@@ -1,0 +1,39 @@
+---
+- block:
+
+    - include_vars:
+        file: "{{ hostvars[inventory_hostname]['inventory_dir'] }}/group_vars/all.yml"
+        name: user_vars
+      tags: always
+
+    - set_fact:
+        "{{ item.key }}": "{{ item.value }}"
+      loop: "{{ user_vars | dict2items }}"
+      tags: [ 'always' ]
+
+    # - name: check is running playbook with --limit
+    #   set_fact:
+    #     is_limit_run: '{{ ansible_limit is defined }}'
+    #   tags: [ 'always' ]
+
+    # - name: gather facts from all nodes
+    #   setup:
+    #   delegate_to: "{{ item }}"
+    #   delegate_facts: true
+    #   with_items: "{{ groups['nodes'] }}"
+    #   ignore_errors: true
+    #   # when: is_limit_run
+
+    - name: import infra-defaults
+      import_role:
+        name: infra-defaults
+        tasks_from: main
+      tags: [ 'always' ]
+
+  delegate_to: "{{ groups['controllers'][0] }}"
+  run_once: true
+
+- name: good.. viper nodes is setup.
+  set_fact:
+    viper_nodes_setup: true
+  tags: [ 'always' ]

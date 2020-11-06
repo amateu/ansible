@@ -1,0 +1,3 @@
+---
+
+- import_playbook: "/data/awesome/viper/ansible_kubespray/ansible/ansible-infra/infra.yml"

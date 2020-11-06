@@ -1,0 +1,39 @@
+---
+docker_dns_servers_strict: 'false'
+flannel_interface: "ens33"
+flannel_backend_type: "host-gw"
+
+docker_registry: "192.168.150.10:5000"
+
+#
+yum_repository: "http://192.168.150.10:6000/yum"
+
+kafka_auth_enabled: false    # don't delete
+
+default_kafka_components:
+  - name: default
+    enabled: "{{ contains_platform_stream }}"
+    replicas: "{{ (count_components | int) }}"
+    zookeeper: default
+    zk_replicas: 3
+    cpu: 2
+    memory: 4G
+    java_xmx: 2G
+    localvolume_capacity: 50G
+    volume_type: localvolume # emptydir or localvolume
+    pvc_per_pod: 2
+    retention_bytes: 10737418240   # 10G
+    retention_hours: 168           # 1 week
+    network_mode: hostNetwork
+    nodes: components
+    kafka_version: "{{ kafka_version }}"
+    kafka_burrow_version: "{{ kafka_burrow_version }}"
+    kafka_burrow_exporter_version: "{{ kafka_burrow_exporter_version }}"
+    topic_retentions: []
+    topics:
+      - "stream.images.face"
+      - "stream.images.cyclist"
+      - "stream.features.algo"
+      - "stream.features.snap"
+      - "update-template-db-topic"
+      - "SearchRecord"      
