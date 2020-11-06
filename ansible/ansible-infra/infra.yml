@@ -2,7 +2,6 @@
 - hosts: nodes
   tasks:
   - include_tasks: _infra_setup.yml
-    when: viper_nodes_setup is not defined
     tags: [ 'always' ]
 
 # init local first
