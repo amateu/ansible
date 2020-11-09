@@ -21,7 +21,7 @@
   notify: Clean yum metadata
   tags: yum_repository
 
- clean yum
+#clean yum
 - name: "Clean yum | clean yum metadata"
   command: yum clean metadata
   args:
