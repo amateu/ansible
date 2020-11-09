@@ -1,0 +1,205 @@
+---
+- name: "yum | remove conflict packages"
+  yum:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ preremove_packages['all_arch'] }}"
+    - "{{ preremove_packages[ansible_architecture] }}"
+  tags: yum
+  ignore_errors: true
+
+- name: "yum | install base packages"
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ preinstall_packages['all_arch'] }}"
+    - "{{ preinstall_packages[ansible_architecture] }}"
+  register: result
+  until: result is succeeded
+  retries: 5
+  delay: 10
+  tags: yum
+
+- name: "selinux | Disable SELinux now & permanently"
+  selinux:
+    state: disabled
+  tags: selinux
+
+- name: "swap | Turn off swap now"
+  shell: swapoff -a
+  tags: swap
+
+- name: "swap | Turn off swap permanently"
+  lineinfile:
+    path: /etc/fstab
+    state: absent
+    regexp: 'swap'
+    backup: yes
+  tags: swap
+
+- name: "sysctl | Tuning kernel"
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/infra-tuning.conf
+    ignoreerrors: yes
+  with_items: "{{ kernel_tuning_params }}"
+  tags: sysctl
+
+- name: "hostname | Set hostname now & permanently"
+  hostname:
+    name: "{{inventory_hostname}}"
+  tags: hostname
+
+- name: "hosts | Populate localhost ipv4 into hosts file"
+  lineinfile:
+    dest: /etc/hosts
+    line: "127.0.0.1 localhost localhost.localdomain"
+    regexp: '^127.0.0.1.*$'
+    state: present
+    backup: yes
+  tags: hosts
+
+- name: "hosts | Populate inventory into hosts file"
+  blockinfile:
+    dest: /etc/hosts
+    block: |-
+      {% for node in (groups['k8s-cluster'] + groups['etcd'] + groups['mons'] + groups['mgrs'] + groups['osds']|default([]))|unique -%}{{ hostvars[node]['access_ip'] | default(hostvars[node]['ip'] | default(hostvars[node]['ansible_host']))  }} {{ node  }} {{ node  }}.{{ dns_domain  }}
+      {% endfor %}
+    state: present
+    create: yes
+    backup: yes
+    marker: "# Ansible inventory hosts {mark}"
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['nodes'] }}"
+  tags: hosts
+
+- name: "hosts | Populate extra hosts entry"
+  lineinfile:
+    dest: /etc/hosts
+    line: "{{ item.ip }} {{ item.name }}"
+    regexp: '^.*\s{{ item.name }}.*$'
+    state: present
+    backup: yes
+  with_items: "{{ extra_hosts|default([]) }}"
+  tags: hosts
+
+- name: "profile | Add user path"
+  lineinfile:
+    path: /etc/profile.d/infra.sh
+    state: present
+    line: "PATH=$PATH:/usr/local/bin"
+    create: yes
+  tags: profile
+
+- name: "profile | Set history date format"
+  lineinfile:
+    path: /etc/profile.d/infra.sh
+    state: present
+    line: "{{ item }}"
+    create: yes
+  with_items:
+    - 'export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S  `whoami` "'
+    - 'export HISTFILESIZE='
+    - 'export HISTSIZE='
+    - 'export PROMPT_COMMAND="history -a; history -n"'
+  tags: profile
+
+- name: "profile | Automatically exit shell when there is no activity"
+  lineinfile:
+    path: /etc/profile.d/infra.sh
+    state: present
+    line: "{{ item }}"
+    create: yes
+  with_items:
+    - "TMOUT={{ ssh_session_timeout }}"
+  tags: profile
+  when: enable_ssh_timeout
+
+- name: "profile | Alias all danger commands"
+  template:
+    src: danger.sh
+    dest: /etc/profile.d/danger.sh
+
+- name: "ulimit | Set ulimit for current shell"
+  lineinfile:
+    path: /etc/profile.d/infra.sh
+    state: present
+    line: "ulimit {{ item.param }} {{ item.value }}"
+    create: yes
+  with_items: "{{ ulimit_params }}"
+  tags: ulimit
+
+- name: "ulimit | Set ulimit permanently"
+  lineinfile:
+    path: /etc/security/limits.conf
+    state: present
+    line: "*  hard  {{ item.name }}  {{ item.value }}"
+    backup: yes
+    create: yes
+  with_items: "{{ ulimit_params }}"
+  tags: ulimit
+
+- name: "timezone | Set time zone"
+  file:
+    src: /usr/share/zoneinfo/Asia/Shanghai
+    dest: /etc/localtime
+    owner: root
+    group: root
+    state: link
+    mode: 0777
+  tags: timezone
+
+- name: "language | Set local language permanently"
+  lineinfile:
+    path: /etc/sysconfig/i18n
+    state: present
+    line: "LANG=en_US.UTF-8"
+    regexp: '^LANG=.*$'
+    backup: yes
+    create: yes
+  tags: language
+
+- name: "language | Set local language now & permanently"
+  lineinfile:
+    path: /etc/locale.conf
+    state: present
+    line: "LANG=en_US.UTF-8"
+    regexp: '^LANG=.*$'
+    backup: yes
+    create: yes
+  tags: language
+
+- name: "Rpcbind | change rpcbind.socket disable ipv6"
+  template:
+    src: "rpcbind.socket"
+    dest: "/usr/lib/systemd/system/"
+  tags: rpcbind
+
+- name: "Rpcbind | systemctl daemon-reload"
+  command: "systemctl daemon-reload"
+  tags: rpcbind
+
+- name: "Rpcbind | systemctl enable rpcbind.socket"
+  command: "systemctl enable rpcbind.socket"
+  tags: rpcbind
+
+- name: "Rpcbind | systemctl start rpcbind.socket"
+  command: "systemctl start rpcbind.socket"
+  tags: rpcbind
+
+#- block:
+#  - name: "DNS | Set default dns upstream when node has no upstream"
+#    set_fact:
+#      dns_records: "{{ lookup('file', '/etc/resolv.conf') }}"
+
+#  - name: "DNS | Set default dns upstream when node has no upstream"
+#    blockinfile:
+#      path: "/etc/resolv.conf"
+#      marker: "#Viper DNS#"
+#      block: |
+#        nameserver {{ infra_default_nameserver }}
+#    when: '"nameserver" not in dns_records'

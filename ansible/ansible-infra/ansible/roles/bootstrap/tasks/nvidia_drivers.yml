@@ -1,0 +1,146 @@
+- name: "kernel | makesure base lspci bin exist, for gpu node"
+  yum:
+    name: pciutils
+    state: present
+  tags: nvidia_drivers
+
+- name: "kernel | add docker nvidia-runtime"
+  yum:
+    name: [
+        "libnvidia-container1-1.0.0-1.x86_64",
+        "nvidia-container-runtime-2.0.0-3.docker18.09.6.x86_64"
+    ]
+    state: present
+  tags: nvidia_drivers
+  when: is_kube_gpu == true
+
+- name: "kernel | install gcc before nvidia cuda drivers, for gpu node"
+  yum:
+    name: gcc
+    state: present
+  tags: nvidia_drivers
+
+- name: "kernel | install nvidia/cuda, for gpu node"
+  yum:
+    # new: 418.67
+    name: [
+        "dkms-nvidia-{{ cuda_drivers_version }}",
+        "nvidia-driver-{{ cuda_drivers_version }}",
+        "nvidia-driver-libs-{{ cuda_drivers_version }}",
+        "nvidia-driver-devel-{{ cuda_drivers_version }}",
+        "nvidia-driver-cuda-{{ cuda_drivers_version }}",
+        "nvidia-driver-NVML-{{ cuda_drivers_version }}",
+    ]
+    state: present
+  register: cuda_drivers_installed
+  when: is_kube_gpu == true
+  tags: nvidia_drivers
+
+- name: "kernel | start nvidia-persistenced.service"
+  systemd:
+    daemon_reload: true
+    enabled: yes
+    name: nvidia-persistenced
+    state: started
+  when: is_kube_gpu == true
+  tags: nvidia_drivers
+
+# NOTICE:
+#     The device files /dev/nvidia* not always exist, and kernel modules nvidia/nvidia-uvm not always loaded.
+#     So we should always makesure these files existed and kernel modules loaded.
+# Read more at: http://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#runfile-verifications
+
+- name: "kernel | populate prepare_ko_nvidia.sh, for gpu node"
+  template:
+    src: "prepare_ko_nvidia.sh"
+    dest: "{{ kube_config_dir }}/prepare_ko_nvidia.sh"
+    mode: 0755
+    owner: root
+    group: root
+  tags: nvidia_drivers
+
+# make sure after reboot nvidia still loaded
+- name: "kernel | makesure some kernel modules will be auto loaded after reboot, for gpu node"
+  lineinfile:
+    path: /etc/rc.d/rc.local
+    state: present
+    line: "/bin/bash {{ kube_config_dir }}/prepare_ko_nvidia.sh > /var/log/prepare_ko_nvidia.log 2>&1"
+    create: yes
+  tags: nvidia_drivers
+
+- name: "kernel | makesure rc.local executable"
+  file:
+    path: /etc/rc.d/rc.local
+    mode: 0755
+    owner: root
+    group: root
+  tags: nvidia_drivers
+
+- name: "kernel | reboot after install driver"
+  command: "/bin/bash {{ kube_config_dir }}/prepare_ko_nvidia.sh"
+  when:
+    - cuda_drivers_installed.changed
+  tags: nvidia_drivers
+
+- name: "kernel | reboot if cuda driver changed"
+  shell: sleep 2 && /sbin/shutdown -r now "System reboot by bootrap tasks kernel.yml for kernel_installed"
+  async: 1
+  poll: 0
+  when:
+    - cuda_drivers_installed.changed
+  tags: nvidia_drivers
+
+- name: "kernel | wait {{ wait_reboot_timeout }} seconds for all nodes's port 22 to become open"
+  wait_for:
+    host: "{{ ansible_host }}"
+    port: 22
+    delay: "{{ wait_reboot_delay }}"
+    timeout: "{{ wait_reboot_timeout }}"
+  connection: local
+  tags: nvidia_drivers
+
+- name: "kernel | makesure nvidia core device files exist"
+  file:
+    path: "{{ item }}"
+  with_items:
+    - "/dev/nvidia0"
+    - "/dev/nvidiactl"
+    - "/dev/nvidia-uvm"
+  when:
+    - cuda_drivers_installed.changed
+  tags: nvidia_drivers
+
+- name: "kernel | makesure nvidia core kernel modules exist"
+  shell: lsmod|grep -E 'nvidia_uvm |nvidia '|wc -l
+  register: current_loaded_nvidia_core_kos
+  failed_when: current_loaded_nvidia_core_kos.stdout != "2"
+  when:
+    - cuda_drivers_installed.changed
+  tags: nvidia_drivers
+
+- name: "kernel | makesure nvidia-smi exist"
+  file:
+    path: /usr/bin/nvidia-smi
+  when:
+    - cuda_drivers_installed.changed
+  tags: nvidia_drivers
+
+- name: "kernel | makesure nvidia-smi work properly"
+  command: nvidia-smi
+  when:
+    - cuda_drivers_installed.changed
+  tags: nvidia_drivers
+
+- name: "kernel | enable nvidia persistence mode"
+  command: nvidia-smi -pm 1
+  when:
+    - cuda_drivers_installed.changed
+  tags: nvidia_drivers
+
+- name: "kernel | makesure nvidia persistence mode enabled"
+  shell: nvidia-smi -i 0 -q|grep 'Persistence Mode'|awk '{print $4}'
+  register: nvidia_persistence_mode
+  failed_when: nvidia_persistence_mode.stdout != "Enabled"
+  when:
+    - cuda_drivers_installed.changed
+  tags: nvidia_drivers

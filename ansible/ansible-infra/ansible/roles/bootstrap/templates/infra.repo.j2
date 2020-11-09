@@ -1,0 +1,34 @@
+[centos]
+baseurl = {{ yum_repository }}/centos/
+gpgcheck = 0
+name = Centos repository
+
+[epel]
+baseurl = {{ yum_repository }}/epel/
+gpgcheck = 0
+name = Epel repository
+
+[docker-ce]
+baseurl = {{ yum_repository }}/docker-ce/
+gpgcheck = 0
+name = Docker repository
+
+[nvidia-docker]
+baseurl = {{ yum_repository }}/nvidia-docker/
+gpgcheck = 0
+name = Nvidia Docker repository
+
+[kernel]
+baseurl = {{ yum_repository }}/kernel/
+gpgcheck = 0
+name = Kernel repository
+
+[cuda]
+baseurl = {{ yum_repository }}/cuda/
+gpgcheck = 0
+name = CUDA repository
+
+[infra]
+baseurl = {{ yum_repository }}/infra-yum/
+gpgcheck = 0
+name = infra repository

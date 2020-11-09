@@ -1,0 +1,22 @@
+---
+# if you want to change k8s images version, you should change the configfile in kubespray/roles/download/defaults/main.yml
+kube_apiserver_image_version:                        kubespray/arm64/gcr.io/google-containers/kube-apiserver:v1.15.5
+kube_proxy_image_version:                            kubespray/arm64/gcr.io/google-containers/kube-proxy:v1.15.5
+kube_controller_manager_image_version:               kubespray/arm64/gcr.io/google-containers/kube-controller-manager:v1.15.5
+kube_scheduler_image_version:                        kubespray/arm64/gcr.io/google-containers/kube-scheduler:v1.15.5
+pause_image_version:                                 kubespray/arm64/gcr.io/google-containers/pause:3.1
+pause_image_version_arch:                            kubespray/arm64/gcr.io/google_containers/pause-arm64:3.1
+flannel_image_version:                               kubespray/arm64/quay.io/coreos/flannel:v0.11.0
+flannel_cni_image_version:                           kubespray/arm64/quay.io/coreos/flannel-cni:v0.3.0
+etcd_image_version:                                  kubespray/arm64/quay.io/coreos/etcd:v3.3.10
+netcheck_agent_image_version:                        kubespray/arm64/quay.io/l23network/k8s-netchecker-agent:v1.0
+netcheck_server_image_version:                       kubespray/arm64/quay.io/l23network/k8s-netchecker-server:v1.0
+coredns_image_version:                               kubespray/arm64/docker.io/coredns/coredns:1.6.0
+nodelocaldns_image_version:                          kubespray/arm64/k8s.gcr.io/k8s-dns-node-cache:1.15.5
+dns_autoscaler_image_version:                        kubespray/arm64/k8s.gcr.io/cluster-proportional-autoscaler-arm64:1.6.0
+dashboard_image_version:                             kubespray/arm64/gcr.io/google_containers/kubernetes-dashboard-arm64:v1.10.1
+nginx_image_version:                                 kubespray/arm64/docker.io/nginx:1.17
+local_path_provi_image_version:                      kubespray/arm64/docker.io/rancher/local-path-provisioner:v0.0.2
+local_volume_provisioner:                            kubespray/arm64/quay.io/external_storage/local-volume-provisioner:v2.3.2
+calico_contollers_version:                           kubespray/arm64/docker.io/calico/kube-controllers:v3.7.3
+helm_image_version:                                  kubespray/arm64/docker.io/lachlanevenson/k8s-helm:v3.1.0

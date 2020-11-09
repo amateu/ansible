@@ -1,0 +1,29 @@
+- name: init dict
+  set_fact:
+    core_dict1: "{{ {} }}"
+    core_dict2: "{{ {} }}"
+
+- name: translate core_dict1
+  set_fact:
+    core_dict1: "{{ core_dict1|default({}) | combine({ svc[attribute]|default('default'): svc }) }}"
+  with_items:
+    - "{{ list1 }}"
+  loop_control:
+    loop_var: svc
+
+- name: translate user dict
+  set_fact:
+    core_dict2: "{{ core_dict2|default({}) | combine({ svc[attribute]|default('default'): svc }) }}"
+  with_items:
+    - "{{ list2 }}"
+  loop_control:
+    loop_var: svc
+
+- name: merge two dict
+  set_fact:
+    core_merged_dict: "{{ {} | combine(core_dict2|default({}), recursive=True) | combine(core_dict1|default({}), recursive=True) }}"
+
+- name: set variable
+  set_fact:
+    "{{ var_list }}": "{{ core_merged_dict.values() | list }}"
+    "{{ var_dict }}": "{{ core_merged_dict }}"

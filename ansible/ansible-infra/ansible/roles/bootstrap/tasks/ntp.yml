@@ -1,0 +1,61 @@
+---
+- name: stop ntpd if running and disable
+  systemd: name=ntpd state=stopped enabled=no
+  when: inventory_hostname!=groups['kube-master'][0]
+
+#ntpdate sync time if offset is bigger than 0.5s
+#else it will slew the time by calling the system adjtime() routine.
+# ntp server updates from outside with ignoring errors the first time
+- name: ntpdate immediately when bootstraps
+  shell: ntpdate -s {{ ntpserver }}
+  when: inventory_hostname!=groups['kube-master'][0]
+  ignore_errors: true
+
+- name: sync rtc clock from system clock
+  shell: hwclock --systohc --utc
+  when: inventory_hostname!=groups['kube-master'][0]
+
+- name: ntp update
+  cron:
+    name: "ntp update"
+    minute: "*/10"
+    user: "root"
+    job: "systemctl stop ntpd && /sbin/ntpdate -s {{ groups['kube-master'][0] }}"
+  when: inventory_hostname != groups['kube-master'][0]
+
+- name: be sure ntp is installed
+  yum: name=ntp state=installed
+  when: inventory_hostname==groups['kube-master'][0]
+
+- name: stop ntpd if running
+  systemd: name=ntpd state=stopped
+  when: inventory_hostname==groups['kube-master'][0]
+
+#ntpdate sync time if offset is bigger than 0.5s
+#else it will slew the time by calling the system adjtime() routine.
+- name: ntpdate immediately when bootstraps
+  shell: ntpdate -s {{ ntpserver }}
+  ignore_errors: true
+  when: inventory_hostname==groups['kube-master'][0]
+
+- name: sync rtc clock from system clock
+  shell: hwclock --systohc --utc
+  when: inventory_hostname==groups['kube-master'][0]
+
+- name: copy ntpd.conf
+  template:
+    src: "ntp.conf"
+    dest: "/etc"
+  when: inventory_hostname==groups['kube-master'][0]
+
+- name: be sure ntpd is running and enabled
+  systemd: name=ntpd state=started enabled=yes
+  when: inventory_hostname==groups['kube-master'][0]
+
+- name: be sure ntpd is disabled except kube-master[0]
+  systemd: name=ntpd state=stopped enabled=no
+  when: inventory_hostname!=groups['kube-master'][0]
+
+- name: 'crontab restart ntpd'
+  cron : name="restart ntpd" minute=51 user="root" job="systemctl restart ntpd"
+  when: inventory_hostname==groups['kube-master'][0]

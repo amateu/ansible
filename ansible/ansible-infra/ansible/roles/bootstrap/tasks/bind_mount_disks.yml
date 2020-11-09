@@ -1,0 +1,9 @@
+---
+# Bind mount disks 
+- name: "Disk | Bind mount disks"
+  include: bind_mount_disks_parted.yml
+  with_items:
+    - "{{ bmount_disk_parted_rules_list }}"
+  loop_control:
+    loop_var: outer_item
+

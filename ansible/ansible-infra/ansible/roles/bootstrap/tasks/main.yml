@@ -1,0 +1,58 @@
+---
+- name: init yum repository
+  import_tasks: yum_repository.yml
+  tags: repo
+
+- name: init docker auth
+  import_tasks: docker_auth_config.yml
+  tags: docker_auth
+
+- name: upgrade kernel
+  import_tasks: kernel_version.yml
+  tags: kernel
+
+#- name: install nvidia drivers
+#  include_tasks: nvidia_drivers.yml
+#  when: is_kube_gpu and inventory_hostname in groups['kube-gpu']
+#  tags: nvidia
+
+#- name: install atlas drivers
+#  include_tasks: atlas_drivers.yml
+#  when: is_kube_npu and inventory_hostname in groups['kube-gpu']
+#  tags: atlas
+
+- name: linux os
+  import_tasks: linux.yml
+  tags: linux
+
+- name: linux ntp
+  import_tasks: ntp.yml
+  when: ntpservers is undefined and ntpclients is undefined
+  tags: linux
+  
+- name: linux ntp
+  import_tasks: ntp_external.yml
+  when: ntpservers is defined
+  tags: linux
+
+- name: linux ntp
+  fail: msg="ntpservers must also be defined when ntpclients is defined!"
+  when: ntpservers is undefined and ntpclients is defined
+  tags: linux
+  
+- name: cpupower
+  import_tasks: cpupower.yml
+  ignore_errors: true
+  tags: cpupower
+
+- name: reset iptables rules
+  import_tasks: iptables.yml
+  tags: iptables
+
+- name: init ssh
+  import_tasks: ssh.yml
+  tags: ssh
+
+#- name: disks partition
+#  import_tasks: disks.yml
+#  tags: disks

@@ -1,0 +1,28 @@
+- name: init dict
+  set_fact:
+    namespaces_dict1: "{{ {} }}"
+    namespaces_dict2: "{{ {} }}"
+
+- name: translate namespaces_dict1
+  set_fact:
+    namespaces_dict1: "{{ namespaces_dict1|default({}) | combine({ svc.group|default('default'): svc }) }}"
+  with_items:
+    - "{{ list1 }}"
+  loop_control:
+    loop_var: svc
+
+- name: translate user dict
+  set_fact:
+    namespaces_dict2: "{{ namespaces_dict2|default({}) | combine({ svc.group|default('default'): svc }) }}"
+  with_items:
+    - "{{ list2 }}"
+  loop_control:
+    loop_var: svc
+
+- name: merge two dict
+  set_fact:
+    namespaces_merged_dict: "{{ {} | combine(namespaces_dict2|default({}), recursive=True) | combine(namespaces_dict1|default({}), recursive=True) }}"
+
+- name: set variable
+  set_fact:
+    namespaces_list: "{{ namespaces_merged_dict.values() | list }}"

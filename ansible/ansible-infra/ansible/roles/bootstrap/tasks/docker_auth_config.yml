@@ -1,0 +1,22 @@
+---
+- name: "bootstrap | add docker auth config directory"
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  with_items:
+    - "{{ docker_auth_config_dirs }}"
+  tags: docker-auth
+
+- name: "bootstrap | write docker auth config"
+  vars:
+    docker_auth: "{{ (docker_auth_username + ':' + docker_auth_passowrd) | b64encode}}"
+  template:
+    src: "docker_auth_config.json.j2"
+    dest: "{{ item }}/config.json"
+    mode: 0755
+    owner: root
+    group: root
+  with_items:
+    - "{{ docker_auth_config_dirs }}"
+  tags: docker-auth

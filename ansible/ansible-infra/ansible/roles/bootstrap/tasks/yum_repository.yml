@@ -1,0 +1,31 @@
+---
+- name: Remove non-infra repositories
+  shell: find /etc/yum.repos.d -type f ! -name infra.repo -exec rm -rf {} \;
+  tags: yum_repository
+
+- name: Edit yum.conf to set obsoletes=0
+  lineinfile:
+    path: "/etc/yum.conf"
+    state: present
+    regexp: '^obsoletes='
+    line: 'obsoletes=0'
+  tags: yum_repository
+
+- name: "Infra repo | copy /etc/yum.repos.d/infra.repo"
+  template:
+    src: "infra.repo.j2"
+    dest: "/etc/yum.repos.d/infra.repo"
+    mode: 0644
+    owner: root
+    group: root
+  notify: Clean yum metadata
+  tags: yum_repository
+
+ clean yum
+- name: "Clean yum | clean yum metadata"
+  command: yum clean metadata
+  args:
+    warn: no
+  failed_when: false
+  tags: yum_repository
+

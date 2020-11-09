@@ -1,0 +1,28 @@
+---
+- name: "Local dirs | Create local dirs for gpus"
+  shell: "mkdir -p {{ outer_item.src_path }}{{ item[1] }} && mkdir -p {{ outer_item.dest_path }}{{ item[1] }}"
+  when: groups[item[0]] is defined and inventory_hostname in groups[item[0]]
+  with_nested:
+    - "{{ outer_item.nodes }}"
+    - "{{ outer_item.volume_names }}"
+  tags: ['localdir']
+
+- name: "Local dirs | Make sure gpu local dirs are bind-mounted"
+  shell: "mount -o bind {{ outer_item.src_path }}{{ item[1] }} {{ outer_item.dest_path }}{{ item[1] }}"
+  when: groups[item[0]] is defined and inventory_hostname in groups[item[0]]
+  with_nested:
+    - "{{ outer_item.nodes }}"
+    - "{{ outer_item.volume_names }}"
+  tags: ['localdir']
+
+- name: "Local dirs | Add entry in /etc/fstab for engine"
+  lineinfile:
+      path: /etc/fstab
+      state: present
+      regexp: ".*{{ outer_item.dest_path }}{{ item[1] }}.*"
+      line: "{{ outer_item.src_path }}{{ item[1] }}   {{ outer_item.dest_path }}{{ item[1] }}    none    bind    0 0"
+  when: groups[item[0]] is defined and inventory_hostname in groups[item[0]]
+  with_nested:
+    - "{{ outer_item.nodes }}"
+    - "{{ outer_item.volume_names }}"
+  tags: ['localdir']

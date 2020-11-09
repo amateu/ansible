@@ -1,0 +1,159 @@
+---
+
+# prepare local ssh env
+- name: "SSH | Make sure ssh keys dir exist"
+  local_action: shell if [ ! -d {{ ssh_keys_dir }} ]; then mkdir -p {{ ssh_keys_dir }}; fi
+  run_once: true
+  tags: ssh
+
+- name: "SSH | Create ssh keys when some not exist"
+  local_action: shell if [ ! -f {{ ssh_keys_dir }}/id_rsa -o ! -f {{ ssh_keys_dir }}/id_rsa.pub ]; then rm -f {{ ssh_keys_dir }}/*; echo -e  'y\n'|ssh-keygen -t rsa -N '' -q -f {{ ssh_keys_dir }}/id_rsa; fi
+  run_once: true
+  tags: ssh
+
+# config nodes ssh server
+- name: "SSH | revert Config sshd"
+  blockinfile:
+    path: /etc/ssh/sshd_config
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    state: absent
+    create: yes
+  tags: ssh
+
+- name: "SSH | Config sshd"
+  blockinfile:
+    path: /etc/ssh/sshd_config
+    block: |
+      Match User root
+      PermitRootLogin yes
+      PubkeyAuthentication yes
+      PasswordAuthentication no
+      Match all
+    insertafter: "^# This sshd"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    create: yes
+  notify:
+  - SSH | restart sshd
+  when: not enable_root_ssh
+  tags: ssh
+
+# config nodes ssh env for root
+- name: "SSH | makesure .ssh dir existed for root"
+  file:
+    path: /root/.ssh
+    state: directory
+    mode: 0700
+    owner: root
+    group: root
+  tags: ssh
+
+- name: "SSH | makesure authorized_key file existed for root"
+  file:
+    path: /root/.ssh/authorized_keys
+    state: touch
+    mode: 0600
+    owner: root
+    group: root
+  tags: ssh
+
+- name: "SSH | check authorized_key backup file existed for root"
+  stat:
+    path: /root/.ssh/authorized_keys.bak
+  register: authorized_keys_bak_root
+  tags: ssh
+
+- name: "SSH | backup authorized_key for root"
+  copy:
+    src: /root/.ssh/authorized_keys
+    dest: /root/.ssh/authorized_keys.bak
+    remote_src: yes
+    mode: 0600
+    owner: root
+    group: root
+  when: authorized_keys_bak_root.stat.exists == false
+  tags: ssh
+
+- name: "SSH | Populate authorized_key for root"
+  authorized_key:
+    user: root
+    state: present
+    key: "{{ item }}"
+  with_file:
+    - "../templates/authorized_keys.j2"
+    - "{{ ssh_keys_dir }}/id_rsa.pub"
+  tags: ssh
+
+- name: "SSH | Populate pub/private keys for root"
+  copy:
+    src: "{{ ssh_keys_dir }}/{{ item.name }}"
+    dest: "/root/.ssh/{{ item.name }}"
+    mode: "{{ item.mode }}"
+    owner: root
+    group: root
+  with_items:
+    - { name: 'id_rsa', mode: '0600' }
+    - { name: 'id_rsa.pub', mode: '0644' }
+  tags: ssh
+
+# config nodes ssh env for common user
+- name: "SSH | makesure .ssh dir existed for common user"
+  file:
+    path: /home/{{ ssh_user }}/.ssh
+    state: directory
+    mode: 0700
+    owner: "{{ ssh_user }}"
+    group: "{{ ssh_user }}"
+  when: ssh_user != "root"
+  tags: ssh
+
+- name: "SSH | makesure authorized_key file existed for common user"
+  file:
+    path: /home/{{ ssh_user }}/.ssh/authorized_keys
+    state: touch
+    mode: 0600
+    owner: "{{ ssh_user }}"
+    group: "{{ ssh_user }}"
+  when: ssh_user != "root"
+  tags: ssh
+
+- name: "SSH | check authorized_key backup file existed for common user"
+  stat:
+    path: /home/{{ ssh_user }}/.ssh/authorized_keys.bak
+  register: authorized_keys_bak_common_user
+  when: ssh_user != "root"
+  tags: ssh
+
+- name: "SSH | backup authorized_key for common user"
+  copy:
+    src: /home/{{ ssh_user }}/.ssh/authorized_keys
+    dest: /home/{{ ssh_user }}/.ssh/authorized_keys.bak
+    remote_src: yes
+    mode: 0600
+    owner: "{{ ssh_user }}"
+    group: "{{ ssh_user }}"
+  when: ssh_user != "root" and authorized_keys_bak_common_user.stat.exists == false
+  tags: ssh
+
+- name: "SSH | Populate authorized_key for common user"
+  authorized_key:
+    user: "{{ ssh_user }}"
+    state: present
+    key: "{{ item }}"
+  with_file:
+    - "../templates/authorized_keys.j2"
+    - "{{ ssh_keys_dir }}/id_rsa.pub"
+  when: ssh_user != "root"
+  tags: ssh
+
+- name: "SSH | Populate pub/private keys for common user"
+  copy:
+    src: "{{ ssh_keys_dir }}/{{ item.name }}"
+    dest: "/home/{{ ssh_user }}/.ssh/{{ item.name }}"
+    mode: "{{ item.mode }}"
+    owner: "{{ ssh_user }}"
+    group: "{{ ssh_user }}"
+  with_items:
+    - { name: 'id_rsa', mode: '0600' }
+    - { name: 'id_rsa.pub', mode: '0644' }
+  when: ssh_user != "root"
+  tags: ssh

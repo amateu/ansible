@@ -1,0 +1,190 @@
+# flannel_backend_type is vxlan for default
+flannel_backend_type: host-gw
+flannel_interface: "eth100"
+
+# Kubernetes
+bootstrap_os: centos
+skip_downloads: false
+download_run_once: true
+download_localhost: true
+configure_docker_repository_enabled: false
+
+ansible_ssh_private_key_file: ~/.ssh/id_rsa
+
+kubernetes_enabled: true
+dashboard_enabled: false
+helm_enabled: true
+helm_version: v3.1.0
+
+kube_version: v1.15.9
+docker_version: 18.09
+cni_version: v0.8.1
+kube_network_plugin: flannel
+kube_pods_subnet: 10.224.0.0/13
+kube_service_addresses: 10.233.0.0/18
+cluster_name: cluster.local
+dns_domain: "{{ cluster_name }}"
+dns_mode: coredns
+kubectl: "{{ bin_dir }}/kubectl"
+
+# useless. just a placeholder var needed by kubespray.
+manual_dns_server: 10.x.x.x
+
+# Limits for kube components
+kube_controller_memory_limit: 1024M
+kube_controller_cpu_limit: 1000m
+kube_scheduler_memory_limit: 1024M
+kube_scheduler_cpu_limit: 1000m
+kube_apiserver_memory_limit: 4000M
+kube_apiserver_cpu_limit: 1800m
+kube_apiserver_memory_requests: 512M
+kube_apiserver_cpu_requests: 200m
+
+# Limits for coredns apps
+dns_memory_limit: 1000Mi
+
+# Limits for kube components and nginx load balancer app
+kube_proxy_memory_requests: 128M
+nginx_memory_limit: 512M
+nginx_cpu_limit: 500m
+flannel_memory_limit: 1000M
+flannel_cpu_limit: 500m
+
+# Reserve this space for system resources
+kubelet_memory_limit: 512M
+kubelet_cpu_limit: 500m
+kubelet_master_memory_limit: 1024M
+kubelet_master_cpu_limit: 1000m
+
+ignore_assert_errors: true
+
+#kube_apiserver_insecure_bind_address: 127.0.0.1
+#kube_apiserver_insecure_port: 8080
+
+kubelet_bind_address: "0.0.0.0"
+# always use node host ip.
+kubelet_address: "{{ ansible_default_ipv4.address }}"
+
+kubelet_cgroup_driver: "systemd"
+
+dns_nodes_per_replica: 5
+dns_cores_per_replica: "{% if is_all_in_one %}128{% else %}64{% endif %}"  # bigger than one node, less than two nodes.
+dns_min_replicas: "{% if is_all_in_one %}1{% else %}2{% endif %}"
+
+
+# flannel_backend_type is vxlan for default
+# flannel_interface: "eth100"
+
+preinstall_selinux_state: disabled
+
+# Kube config Dir
+kube_config_dir: /etc/kubernetes
+
+local_volume_provisioner_enabled: true
+default_local_volume_provisioner_storage_classes:
+  storageclass-local-cassandra-commitlog:
+    host_dir: "/mnt/locals/cassandras-commitlog"
+    mount_dir: "/local-cassandra-commitlog-disks"
+  storageclass-local-cassandra-data:
+    host_dir: "/mnt/locals/cassandras-data"
+    mount_dir: "/local-cassandra-data-disks"
+  storageclass-local-redis:
+    host_dir: "/mnt/locals/redis"
+    mount_dir: "/local-redis-disks"
+  storageclass-local-kafka:
+    host_dir: "/mnt/locals/kafkas"
+    mount_dir: "/local-kafka-disks"
+  storageclass-local-zookeeper:
+    host_dir: "/mnt/locals/zookeepers"
+    mount_dir: "/local-zookeeper-disks"
+  storageclass-local-dir:
+    host_dir: "/mnt/locals/dirs"
+    mount_dir: "/local-dir-disks"
+  storageclass-local-monitoring-prometheus:
+    host_dir: "/mnt/locals/monitoring-prometheus"
+    mount_dir: "/local-monitoring-prometheus-disks"
+  storageclass-local-monitoring-alertmanager:
+    host_dir: "/mnt/locals/monitoring-alertmanager"
+    mount_dir: "/local-monitoring-alertmanager-disks"
+  storageclass-local-logging-elasticsearch:
+    host_dir: "/mnt/locals/logging-elasticsearch"
+    mount_dir: "/local-logging-elasticsearch-disks"
+  storageclass-local-minio:
+    host_dir: "/mnt/locals/minio"
+    mount_dir: "/minio-data"
+  storageclass-local-engine:
+    host_dir: "/mnt/locals/engine"
+    mount_dir: "/local-engine-disks"
+  storageclass-local-elasticsearch:
+    host_dir: "/mnt/locals/structdb-elasticsearch"
+    mount_dir: "/local-elasticsearch-disks"
+  storageclass-local-mysql:
+    host_dir: "/mnt/locals/mysql"
+    mount_dir: "/local-mysql-disks"
+  storageclass-local-hadoop-journalnode:
+    host_dir: "/mnt/locals/hadoop-journalnode-editor"
+    mount_dir: "/local-hadoop-journalnode-editor-disks"
+  storageclass-local-hadoop-namenode-metadata:
+    host_dir: "/mnt/locals/hadoop-namenode-metadata"
+    mount_dir: "/local-hadoop-namenode-metadata-disks"
+  storageclass-local-hadoop-datanode-data:
+    host_dir: "/mnt/locals/hadoop-datanode-data"
+    mount_dir: "/local-hadoop-datanode-data-disks"
+  storageclass-local-olap-elasticsearch:
+    host_dir: "/mnt/locals/datafusion-elasticsearch"
+    mount_dir: "/local-olap-elasticsearch-disks"
+  storageclass-local-model-manager:
+    host_dir: "/mnt/locals/model-manager"
+    mount_dir: "/local-model-manager-disks"
+
+
+# cis
+#etcd_peer_client_auth: true
+#etcd_secure_client: true
+#etcd_peer_client_auth: true
+#kube_encrypt_secret_data: true
+#kube_encryption_algorithm: "aesgcm"
+#podsecuritypolicy_enabled: true
+#kubernetes_audit: true
+#audit_log_maxbackups: 10
+#feature_gate_v1_12: ["RotateKubeletServerCertificate=true"]
+
+kube_kubeadm_apiserver_extra_args:
+  service-account-lookup: true
+  profiling: false
+  # kubelet-certificate-authority: "/etc/kubernetes/ssl/ca.crt"
+
+kube_apiserver_enable_admission_plugins:
+  - NodeRestriction
+  - NamespaceLifecycle
+  - LimitRanger
+  - ServiceAccount
+  - DefaultStorageClass
+  - ResourceQuota
+
+kube_profiling: false
+
+kube_controller_manager_bind_address: 127.0.0.1
+kube_kubeadm_controller_extra_args:
+  profiling: false
+  terminated-pod-gc-threshold: 12500
+
+kube_scheduler_bind_address: 127.0.0.1
+kube_kubeadm_scheduler_extra_args:
+  profiling: false
+
+kubelet_custom_flags:
+  - --event-qps=0
+  - --allowed-unsafe-sysctls 'kernel.msg*,net.ipv4.*,net.core.*'
+  #- --protect-kernel-defaults=true
+
+
+docker_options: >-
+  --data-root={{ docker_daemon_graph }} {{ docker_log_opts }} --live-restore
+  --exec-opt native.cgroupdriver=systemd
+  {%- if is_kube_gpu and ansible_architecture != "aarch64" %}
+  --add-runtime=nvidia=/usr/bin/nvidia-container-runtime --default-runtime=nvidia
+  {%- endif -%}
+
+kube_feature_gates:
+  - TTLAfterFinished=true

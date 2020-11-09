@@ -1,0 +1,39 @@
+---
+- name: "cpupower | config cpupower.service"
+  lineinfile:
+    path: /etc/sysconfig/cpupower
+    state: present
+    line: 'CPUPOWER_STOP_OPTS="frequency-set -g performance"'
+    regexp: 'CPUPOWER_STOP_OPTS'
+    backup: yes
+    create: yes
+  tags: cpupower
+
+- name: "service | ensure service is started and enabled"
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  with_items: "{{ service_list }}"
+  tags: cpupower 
+
+- name: "cpupower | ensure cpupower service is take effect"
+  shell: cpupower frequency-info --policy
+  register: cpupower_policy
+  tags: cpupower
+
+- name: "cpupower | restart cpupower service if not take effect"
+  service:
+    name: cpupower
+    state: restarted
+  when: not(cpupower_policy.stdout | search("performance"))
+  tags: cpupower
+
+- name: "set system latency-performance mode"
+  blockinfile:
+    path: /etc/rc.d/rc.local
+    block: |
+      tuned-adm profile latency-performance
+      cpupower frequency-set --governor performance
+    marker: "# {mark} ANSIBLE MANAGED BLOCK performance mode"
+  tags: cpupower

@@ -1,0 +1,123 @@
+---
+- name: "stop and disable firewalld.service"
+  service:
+    name: "firewalld"
+    enabled: no
+    state: stopped
+  tags: iptables
+
+- name: "Verify if br_netfilter module exists"
+  shell: "modinfo br_netfilter"
+  register: modinfo_br_netfilter
+  failed_when: modinfo_br_netfilter.rc not in [0, 1]
+  changed_when: false
+  tags: iptables
+
+- name: "Enable br_netfilter module"
+  modprobe:
+    name: br_netfilter
+    state: present
+  when: modinfo_br_netfilter.rc == 0
+  tags: iptables
+
+- name: "Persist br_netfilter module"
+  copy:
+    dest: /etc/modules-load.d/kubespray-br_netfilter.conf
+    content: br_netfilter
+  when: modinfo_br_netfilter.rc == 0
+  tags: iptables
+
+# kube-proxy needs net.bridge.bridge-nf-call-iptables enabled when found if br_netfilter is a module
+- name: "Check if bridge-nf-call-iptables key exists"
+  command: "sysctl net.bridge.bridge-nf-call-iptables"
+  failed_when: false
+  changed_when: false
+  register: sysctl_bridge_nf_call_iptables
+  tags: iptables
+
+- name: "Enable bridge-nf-call tables"
+  sysctl:
+    name: "{{ item }}"
+    state: present
+    value: 1
+    reload: yes
+  when: modinfo_br_netfilter.rc == 0 and sysctl_bridge_nf_call_iptables.rc == 0
+  with_items:
+    - net.bridge.bridge-nf-call-iptables
+    - net.bridge.bridge-nf-call-arptables
+    - net.bridge.bridge-nf-call-ip6tables
+  tags: iptables
+
+- name: "ensure rc.local will be executed during boot"
+  file:
+    path: /etc/rc.d/rc.local
+    mode: 0755
+    owner: root
+    group: root
+  tags: iptables
+
+- name: "flush iptables after reboot"
+  blockinfile:
+    path: /etc/rc.d/rc.local
+    block: |
+      #iptables -F -w
+      #iptables -F -t nat -w
+    marker: "# {mark} ANSIBLE MANAGED BLOCK iptables"
+  tags: iptables
+
+- name: "check k8s rules is already exist"
+  shell: iptables -L -t nat -w
+  register: current_rules
+  tags: iptables
+
+- name: "clean iptables"
+  shell: iptables -F -w
+  when: "'KUBE' not in current_rules.stdout"
+  tags: iptables
+
+- name: "collect all ips"
+  set_fact:
+    unity_iptables_whitelist: "{{unity_iptables_whitelist}},{{ item }}"
+  with_items: "{{ ansible_all_ipv4_addresses }}"
+  when:
+    - is_all_in_one
+  tags: iptables
+
+- name: "collect iptables port blacklist"
+  set_fact:
+    unity_iptables_blacklist_port: "{{ unity_iptables_blacklist | map(attribute='port') | join(',') }}"
+  when:
+    - is_all_in_one
+  tags: iptables
+
+- name: "unity iptables whitelist"
+  blockinfile:
+    path: /etc/rc.d/rc.local
+    block: |
+      iptables -L INPUT | grep "unity_whitelist" || iptables -w -A INPUT -s {{ unity_iptables_whitelist }} -m comment --comment "unity_whitelist" -j ACCEPT
+    marker: "# {mark} unity iptables whitelist"
+  when:
+    - is_all_in_one
+  tags: iptables
+
+- name: "unity iptables blacklist"
+  blockinfile:
+    path: /etc/rc.d/rc.local
+    block: |
+      iptables -L INPUT | grep "unity_blacklist" || iptables -w -A INPUT -m multiport -p tcp --dports {{ unity_iptables_blacklist_port }} -m comment --comment "unity_blacklist" -j DROP
+    marker: "# unity iptables port blacklist"
+  when:
+    - is_all_in_one
+  tags: iptables
+
+- name: "insert unity iptables whitelist"
+  shell: iptables -L INPUT | grep "unity_whitelist" || iptables -w -A INPUT -s {{ unity_iptables_whitelist }} -m comment --comment "unity_whitelist" -j ACCEPT
+  when:
+    - is_all_in_one
+  tags: iptables
+
+- name: "insert unity iptables blacklist"
+  shell: iptables -L INPUT | grep "unity_blacklist" || iptables -w -A INPUT -m multiport -p tcp --dports {{ unity_iptables_blacklist_port }} -m comment --comment "unity_blacklist" -j DROP
+  when:
+    - is_all_in_one
+  tags: iptables

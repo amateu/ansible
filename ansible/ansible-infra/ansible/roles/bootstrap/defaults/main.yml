@@ -1,0 +1,150 @@
+---
+# Kernel version
+# kernel_version: 4.19.43-300.el7.x86_64
+is_kube_gpu: "{% if groups['kube-gpu'] is defined %}{{ inventory_hostname in groups['kube-gpu'] }}{% else %}false{% endif %}"
+is_kube_npu: "{% if groups['kube-npu'] is defined %}{{ inventory_hostname in groups['kube-npu'] }}{% else %}false{% endif %}"
+
+preremove_packages:
+  all_arch:
+  x86_64:
+    - rsync
+  aarch64: []
+  
+
+preinstall_packages:
+  all_arch:
+    - python
+    - wget
+    - curl
+    - axel
+    - vim
+    - ntp
+    - firewalld
+    - jq
+    - ceph-common
+    - gcc
+    - telnet
+    - nmap
+    - sysstat
+    - iftop
+    - iotop
+    - lsof
+    - ipmitool
+    - nc
+    - tmux
+    - bind-utils
+    - nfs-utils
+    - kernel-tools
+    - kexec-tools-2.0.15-33.el7.x86_64
+    - system-config-kdump
+    - python-yaml
+    - python2-passlib
+    - python2-jsonpointer
+    - httpd-tools
+    - glibc.i686
+    - zlib.i686
+    - zlib-1.2.7-18.el7.x86_64
+    - expect
+    - python2-pyyaml
+    - python2-openshift
+    - rsync31u
+    - bash-completion
+    - git
+    - python-docker-py
+  x86_64:
+    - rsync31u
+  aarch64: []
+
+
+kernel_tuning_params:
+  - { name: kernel.sysrq, value: 1 }
+  - { name: kernel.core_uses_pid, value: 1 }
+  - { name: kernel.msgmnb, value: 65536}
+  - { name: kernel.msgmax, value: 65536}
+  - { name: kernel.shmmax, value: 68719476736 }
+  - { name: kernel.shmall, value: 4294967296 }
+  - { name: kernel.pid_max, value: 4194303 }
+  - { name: kernel.core_pattern, value: /data/cores }
+  - { name: vm.zone_reclaim_mode, value: 0 }
+  - { name: vm.min_free_kbytes, value: 524288 }
+  - { name: vm.vfs_cache_pressure, value: 200 }
+  #- { name: vm.swappiness, value: 30 }
+  - { name: net.ipv4.ip_forward, value: 1 }
+  - { name: net.ipv4.conf.default.accept_source_route, value: 0 }
+  - { name: net.ipv4.tcp_syncookies, value: 1 }
+  - { name: net.ipv4.tcp_max_syn_backlog, value: 1024 }
+  - { name: net.ipv4.ip_nonlocal_bind, value: 1 }
+  - { name: net.core.netdev_max_backlog, value: 3000 }
+  - { name: net.ipv6.conf.all.disable_ipv6, value: 0 }
+  - { name: net.ipv6.conf.default.disable_ipv6, value: 0 }
+  - { name: net.ipv4.conf.default.rp_filter, value: 2 }
+  - { name: net.ipv4.conf.all.rp_filter, value: 2 }
+  - { name: net.ipv4.conf.all.arp_announce, value: 2 }
+  - { name: net.ipv4.neigh.default.gc_thresh1, value: 8192 }
+  - { name: net.ipv4.neigh.default.gc_thresh2, value: 32768 }
+  - { name: net.ipv4.neigh.default.gc_thresh3, value: 65536 }
+  - { name: net.bridge.bridge-nf-call-iptables, value: 1 }
+  - { name: net.bridge.bridge-nf-call-ip6tables, value: 1 }
+  - { name: net.bridge.bridge-nf-call-arptables, value: 1 }
+  - { name: fs.inotify.max_user_watches, value: 1048576 }
+  - { name: kernel.hung_task_panic, value: 1 }
+  - { name: vm.dirty_background_ratio, value: 1 }
+  - { name: vm.dirty_ratio, value: 5 }
+  - { name: vm.dirty_expire_centisecs, value: 1000 }
+  - { name: vm.dirty_writeback_centisecs, value: 500 }
+  - { name: vm.max_map_count, value: 655300 }
+
+kernelcrash_size: 64M
+
+ulimit_params:
+  - { name: 'nproc', param: '-SHu', value: 65536 } # max number of processes
+  - { name: 'nofile', param: '-SHn', value: 65536 } # max number of open file descriptors
+  - { name: 'fsize', param: '-SHf', value: 'unlimited' } # maximum filesize (KB)
+
+service_list:
+  - cpupower
+
+dns_domain: "{{ cluster_name }}"
+cluster_name: cluster.local
+
+ssh_keys_dir: "{{ hostvars[inventory_hostname]['inventory_dir'] }}/ssh_keys"
+ssh_user: "{{ hostvars[inventory_hostname]['ansible_user'] }}"
+
+wait_reboot_delay: 10
+wait_reboot_timeout: 300
+
+cuda_drivers_version: "418.67"
+kernel_name: kernel
+kernel_version: 4.19.43-300.el7.x86_64
+atlas_drivers_version: "1.2.1"
+atlas_drivers: "npu_centos.arm_{{ atlas_drivers_version }}"
+atlas_drivers_download_url: "{{ yum_repository }}/infra-yum/downloads/aarch64/{{ atlas_drivers }}.zip"
+
+enable_root_ssh: true
+enable_ssh_timeout: true
+
+# strings: 10.233.0.2/18,192.168.1.1,172.21.8.1/24
+unity_iptables_whitelist: "172.17.0.1/16,127.0.0.1/8,{{ kube_pods_subnet }},{{ kube_service_addresses }}"
+unity_iptables_blacklist:
+  - { port: 2379, name: etcd2379 }
+  - { port: 2380, name: etcd2380 }
+  - { port: 10250, name: k8s10250 }
+  - { port: 10251, name: k8s10251 }
+  - { port: 10252, name: k8s10252 }
+  - { port: 19255, name: k8s19255 }
+  - { port: 10256, name: k8s10256 }
+  - { port: 4191, name: cAdvisor4191 }
+  - { port: 25, name: postfix25 }
+  - { port: 8443, name: license-ca8443 }
+  - { port: 23333, name: license-ca23333 }
+  - { port: 30102, name: minio30102 }
+  - { port: 9100, name: node-exporter9100 }
+
+ssh_session_timeout: 1800
+
+docker_auth_config_dirs:
+  - /.docker
+  - ~/.docker
+
+ntpserver: "cn.pool.ntp.org"
+infra_default_nameserver: "169.254.20.20"

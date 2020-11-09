@@ -1,0 +1,79 @@
+---
+- name: Run infra-defaults in controllers[0], other nodes just use values evaluated by block
+  block:
+
+    - name: set default facts
+      set_fact:
+        is_home_dev: "{{ is_home_dev if is_home_dev is defined else 'false' }}"
+        is_upgrade: "{{ is_upgrade if is_upgrade is defined else 'false' }}"
+        is_dry_run: "{{ is_dry_run if is_dry_run is defined else 'false' }}"
+        is_viper: "{{ is_viper if is_viper is defined else 'false' }}"
+
+    - name: set architecture_groups
+      set_fact:
+        architecture_groups:
+          x86_64: amd64
+          aarch64: arm64
+          armv7l: arm
+
+    - name: ansible_architecture_rename
+      set_fact:
+        host_architecture: >-
+          {%- if ansible_architecture in architecture_groups -%}
+          {{ architecture_groups[ansible_architecture] }}
+          {%- else -%}
+           {{ ansible_architecture }}
+          {% endif %}
+
+    - name: image_arch
+      set_fact:
+        image_arch: "{{ host_architecture | default('amd64') }}"
+
+    - name: count group hosts numbers
+      set_fact:
+        count_controllers: "{{ groups['controllers'] | length }}"
+        is_all_in_one: "{{ groups['nodes'] | length | int == 1 }}"
+        is_nvidia: "{{ groups['kube-gpu'] | length | int >= 1 if groups['kube-gpu'] is defined else false }}"
+        is_atlas: "{{ groups['kube-npu'] | length | int >= 1 if groups['kube-npu'] is defined else false }}"
+
+    - name: set facts about home dev
+      set_fact:
+        use_default_passwords: "{{ use_default_passwords if use_default_passwords is defined else 'true' }}"
+        enable_root_ssh: "{{ enable_root_ssh if enable_root_ssh is defined else 'true' }}"
+        enable_ssh_timeout: "{{ enable_ssh_timeout if enable_ssh_timeout is defined else 'false' }}"
+      when: is_home_dev
+
+    - name: set facts about https
+      set_fact:
+        https_enabled: "{{ https_enabled if https_enabled is defined else true }}"
+
+    - include_vars: defaults/kubespray.yml
+    - include_vars: defaults/infra.yml
+    - include_vars: defaults/main.yml
+
+    - name: viper-default
+      include_role:
+        name: viper-defaults
+      when: is_viper
+
+    - include_vars: defaults/kubespray_images.yml
+    - include_vars: defaults/image-versions-k8s-{{ image_arch }}.yml
+
+    - name: set core
+      set_fact:
+        disk_parted_rules: "{{ default_disk_parted_rules | combine(disk_parted_rules|default({}) or {}) }}"
+        local_volume_provisioner_storage_classes: "{{ default_local_volume_provisioner_storage_classes | combine(local_volume_provisioner_storage_classes|default({}) or {}) }}"
+        namespaces: "{{ default_namespaces | union(namespaces|default([])) }}"
+        core_services:
+         - "{{ {'list1': node_groups_labels|default([]), 'list2': default_node_groups_labels|default([]), 'attribute': 'group','var_list': 'node_groups_labels_list', 'var_dict': 'node_groups_labels_dict'} }}"
+         - "{{ {'list1': bmount_disk_parted_rules|default([]), 'list2': default_bmount_disk_parted_rules|default([]), 'attribute': 'name','var_list': 'bmount_disk_parted_rules_list', 'var_dict': 'bmount_disk_parted_rules_dict'} }}"
+         - "{{ {'list1': kong_controllers|default([]), 'list2': default_kong_controllers|default([]), 'attribute': 'name','var_list': 'kong_controllers_list', 'var_dict': 'kong_controllers_dict'} }}"
+        kubectl: "{{ bin_dir if bin_dir is defined else '/usr/local/bin' }}/kubectl"
+
+    - name: merge two list
+      include: merge.yml list1={{ item.list1 }} list2={{ item.list2 }} attribute={{ item.attribute }} var_list={{ item.var_list }} var_dict={{ item.var_dict }}
+      with_items:
+        - "{{ core_services }}"
+
+  delegate_to: controlers[0]
+  run_once: true

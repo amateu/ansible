@@ -1,0 +1,24 @@
+---
+- name: be sure chrony is installed
+  yum: name=chrony state=installed
+
+- name: stop chrony if running
+  systemd: name=chronyd state=stopped
+
+#ntpdate sync time if offset is bigger than 0.5s
+#else it will slew the time by calling the system adjtime() routine.
+- name: ntpdate immediately when bootstraps
+  shell: ntpdate -s {{ ntpserver[0] }}
+  ignore_errors: true
+
+- name: sync rtc clock from system clock
+  shell: hwclock --systohc --utc
+
+- name: copy chrony.conf
+  template:
+    src: "chrony.conf"
+    dest: "/etc"
+
+- name: be sure chrony is running and enabled
+  systemd: name=chronyd state=started enabled=yes
+

@@ -1,0 +1,160 @@
+#- name: "kernel | makesure base config dir exist"
+#  file:
+#    path: "{{ kube_config_dir }}"
+#    state: directory
+#  tags: kernel_version
+
+- name: "kernel | makesure {{ kernel_name }}-{{ kernel_version }} and -devel- rpm has been installed"
+  yum:
+    name: ['{{ kernel_name }}-{{ kernel_version }}', '{{ kernel_name }}-devel-{{ kernel_version }}']
+    state: present
+  register: kernel_installed
+  tags: kernel_version
+
+- name: "kernel | check if any kernel-headers installed"
+  shell: "rpm -qa | egrep 'kernel-headers|kernel-ml-headers' | cat"
+  register: existing_kernel_headers_pkgs
+  tags: kernel_version
+
+- name: "kernel | install {{ kernel_name }}-headers if no headers pkg installed"
+  yum:
+    name: ['{{ kernel_name }}-headers-{{ kernel_version }}']
+    state: present
+  when: "existing_kernel_headers_pkgs.stdout_lines|length == 0"
+  tags: kernel_version
+
+- name: "kernel | check unfinished install package and complete"
+  command: "yum-complete-transaction -q"
+  tags: kernel_version
+
+# NOTICE:
+# For our stage env hosts, unload kernel module nouveau may hung or result host reboot!
+# To avoid these problems, we can only do following ops:
+#   1) update default grub GRUB_CMDLINE_LINUX, specify modprobe.blacklist=nouveau;
+#   2) update grub config, force append param modprobe.blacklist=nouveau for our kernel;
+#   3) reboot host if module nouveau already loaded;
+- name: "kernel | get grub content"
+  shell: grep 'GRUB_CMDLINE_LINUX' /etc/default/grub | perl -pe 's/GRUB_CMDLINE_LINUX="\s*(.*?)\s*"/\1/'
+  register: grub_cmdline_default
+  tags: kernel_version
+
+- name: "kernel | split grub content"
+  set_fact:
+    grub_cmdline_items: "{{ grub_cmdline_default.stdout.split() }}"
+  tags: kernel_version
+
+- name: "kernel | get original net.ifnames/biosdevname/modprobe.blacklist/crashkernel in /etc/default/grub"
+  set_fact:
+    net_ifnames_default: "{{ grub_cmdline_items | select('search', 'net.ifnames') | list | first | default('') }}"
+    biosdevname_default: "{{ grub_cmdline_items | select('search', 'biosdevname') | list | first | default('') }}"
+    modeprobe_blacklist_default: "{{ grub_cmdline_items | select('search', 'modprobe.blacklist') | list | first | default('modprobe.blacklist=nouveau') }}"
+    crashkernel_default: "{{ grub_cmdline_items | select('search', 'crashkernel') | list | first | default('crashkernel={{ kernelcrash_size }}') }}"
+  tags: kernel_version
+
+- name: "kernel | append nouveau to modeprobe_blacklist_default"
+  set_fact:
+    modeprobe_blacklist_default: "{{ modeprobe_blacklist_default + ',nouveau' }}"
+  when:
+    - "{{ 'nouveau' not in modeprobe_blacklist_default }}"
+  tags: kernel_version
+
+- name: "kernel | remove net.ifnames/biosdevname/modprobe.blacklist/crashkernel in /etc/default/grub"
+  set_fact:
+    grub_cmdline_items: "{{ grub_cmdline_items | reject('search', item) | list }}"
+  with_items:
+    - "net.ifnames"
+    - "biosdevname"
+    - "modprobe.blacklist"
+    - "crashkernel"
+  tags: kernel_version
+
+- name: "kernel | update crashkernel for coredump in /etc/default/grub"
+  set_fact:
+    crashkernel_default: "crashkernel={{ kernelcrash_size }}"
+  when: crashkernel_default | search("auto")
+
+- name: "kernel | append back net.ifnames/biosdevname/modprobe.blacklist/crashkernel to grub_cmdline_items"
+  set_fact:
+    grub_cmdline_items: "{{ grub_cmdline_items + [item] }}"
+  when:
+    - "{{ item != '' }}"
+  with_items:
+    - "{{ net_ifnames_default }}"
+    - "{{ biosdevname_default }}"
+    - "{{ modeprobe_blacklist_default }}"
+    - "{{ crashkernel_default }}"
+  tags: kernel_version
+
+- name: "kernel | write back /etc/default/grub"
+  vars:
+    cmdline: "{{ grub_cmdline_items | join(' ') }}"
+  lineinfile:
+    path: /etc/default/grub
+    state: present
+    regexp: '^GRUB_CMDLINE_LINUX='
+    line: 'GRUB_CMDLINE_LINUX="{{ cmdline }}"'
+  tags: kernel_version
+
+- name: "kernel | update default grub, set grub_default=0, to use the first list kernel."
+  lineinfile:
+    path: /etc/default/grub
+    state: present
+    regexp: '^GRUB_DEFAULT='
+    line: 'GRUB_DEFAULT=0'
+  tags: kernel_version
+
+- name: "kernel | update grub config for current kernel"
+  shell: |
+      if [ -f "/boot/grub2/grub.cfg" ]; then
+            grub2-mkconfig -o /boot/grub2/grub.cfg
+      fi
+      if [ -f "/boot/efi/EFI/redhat/grub.cfg" ]; then
+            grub2-mkconfig -o /boot/efi/EFI/redhat/grub.cfg
+      fi
+      if [ -f "/boot/efi/EFI/centos/grub.cfg" ]; then
+            grub2-mkconfig -o /boot/efi/EFI/centos/grub.cfg
+      fi
+  tags: kernel_version
+
+- name: "kernel | reboot if kernel_installed changed"
+  shell: sleep 2 && /sbin/shutdown -r now "System reboot by bootrap tasks kernel.yml for kernel_installed"
+  async: 1
+  poll: 0
+  when:
+    - kernel_installed.changed
+  tags: kernel_version
+
+- name: "kernel | wait {{ wait_reboot_timeout }} seconds for all nodes's port 22 to become open"
+  wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ ansible_port|default(22) }}"
+    delay: "{{ wait_reboot_delay }}"
+    timeout: "{{ wait_reboot_timeout }}"
+  connection: local
+  tags: kernel_version
+
+- name: "kernel | check current kernel version, failed if not using newly installed kernel"
+  command: uname -r
+  register: current_kernel_version
+  failed_when: "current_kernel_version.stdout != kernel_version"
+  tags: kernel_version
+
+- name: "kernel | check if kernel module nouveau already loaded, failed if nouveau still loaded."
+  shell: lsmod|awk '{print $1}'
+  register: current_loaded_kos
+  failed_when: "'nouveau' in current_loaded_kos.stdout_lines"
+  tags: kernel_version
+
+- block:
+  - name: "kernel | ensure kudump service is enabled and started"
+    service:
+      name: "kdump"
+      enabled: yes
+      state: started
+    tags: kernel_version
+
+  - name: "kernel | check kdump service is active"
+    command: "systemctl is-active kdump"
+    register: kdump_status
+    failed_when: "'active' not in kdump_status.stdout_lines"
+    tags: kernel_version

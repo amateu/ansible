@@ -1,0 +1,62 @@
+# you may overwrite it to ""
+# you can grep '_image_repo: "' in kubespray/roles/download/defaults/main.yml
+# then add a prefix {{ kube_registry_pre }}, then paste here.
+kube_registry_pre: "{{ kubespray_registry }}/kubespray/{% if image_arch=='arm64' %}{{ image_arch }}/{% else %}{% endif %}"
+
+
+# Download URLs
+download_file_pre: "{{ yum_repository }}/infra-yum/downloads/"
+kubeadm_download_url: "{{ download_file_pre }}kubernetes-release/release/{{ kubeadm_version }}/bin/linux/{{ image_arch }}/kubeadm-b31f398e"
+kubelet_download_url: "{{ download_file_pre }}kubernetes-release/release/{{ kube_version }}/bin/linux/{{ image_arch }}/kubelet"
+kubectl_download_url: "{{ download_file_pre }}kubernetes-release/release/{{ kube_version }}/bin/linux/{{ image_arch }}/kubectl"
+# hyperkube_download_url: "{{ download_file_pre }}kubernetes-release/release/{{ kube_version }}/bin/linux/{{ image_arch }}/hyperkube"
+cni_download_url: "{{ download_file_pre }}containernetworking/plugins/releases/download/{{ cni_version }}/cni-plugins-{{ image_arch }}-{{ cni_version }}.tgz"
+
+kubeadm_checksums:
+  amd64:
+    v1.15.9: e6ca771d6ef6ab563568793cf27946aca70aaf747eb0d0de953b7f608a388917
+    v1.15.5: ddb20cbe508a9fa199e8dca364027072e871503017da26e0b3c9c119fdc6197f
+  arm64:
+    v1.15.5: 26e0587398cf4b5bf4456aa65c507aa3713498025a43e3ae1654f54295f27464
+
+kube_image_repo: "{{ kube_registry_pre }}gcr.io/google-containers"
+etcd_image_repo: "{{ kube_registry_pre }}quay.io/coreos/etcd"
+flannel_image_repo: "{{ kube_registry_pre }}quay.io/coreos/flannel"
+flannel_cni_image_repo: "{{ kube_registry_pre }}quay.io/coreos/flannel-cni"
+calico_node_image_repo: "{{ kube_registry_pre }}docker.io/calico/node"
+calico_cni_image_repo: "{{ kube_registry_pre }}docker.io/calico/cni"
+calico_policy_image_repo: "{{ kube_registry_pre }}docker.io/calico/kube-controllers"
+calico_rr_image_repo: "{{ kube_registry_pre }}docker.io/calico/routereflector"
+calico_typha_image_repo: "{{ kube_registry_pre }}docker.io/calico/typha"
+install_socat_image_repo: "{{ kube_registry_pre }}docker.io/xueshanf/install-socat"
+netcheck_agent_image_repo: "{{ kube_registry_pre }}quay.io/l23network/k8s-netchecker-agent"
+netcheck_server_image_repo: "{{ kube_registry_pre }}quay.io/l23network/k8s-netchecker-server"
+weave_kube_image_repo: "{{ kube_registry_pre }}docker.io/weaveworks/weave-kube"
+weave_npc_image_repo: "{{ kube_registry_pre }}docker.io/weaveworks/weave-npc"
+contiv_image_repo: "{{ kube_registry_pre }}docker.io/contiv/netplugin"
+contiv_init_image_repo: "{{ kube_registry_pre }}docker.io/contiv/netplugin-init"
+contiv_auth_proxy_image_repo: "{{ kube_registry_pre }}docker.io/contiv/auth_proxy"
+contiv_etcd_init_image_repo: "{{ kube_registry_pre }}docker.io/ferest/etcd-initer"
+contiv_ovs_image_repo: "{{ kube_registry_pre }}docker.io/contiv/ovs"
+cilium_image_repo: "{{ kube_registry_pre }}docker.io/cilium/cilium"
+cilium_init_image_repo: "{{ kube_registry_pre }}docker.io/library/busybox"
+kube_router_image_repo: "{{ kube_registry_pre }}docker.io/cloudnativelabs/kube-router"
+multus_image_repo: "{{ kube_registry_pre }}docker.io/nfvpe/multus"
+coredns_image_repo: "{{ kube_registry_pre }}docker.io/coredns/coredns"
+nodelocaldns_image_repo: "{{ kube_registry_pre }}k8s.gcr.io/k8s-dns-node-cache"
+helm_image_repo: "{{ kube_registry_pre }}docker.io/lachlanevenson/k8s-helm"
+tiller_image_repo: "{{ kube_registry_pre }}gcr.io/kubernetes-helm/tiller"
+registry_image_repo: "{{ kube_registry_pre }}docker.io/registry"
+registry_proxy_image_repo: "{{ kube_registry_pre }}gcr.io/google_containers/kube-registry-proxy"
+metrics_server_image_repo: "{{ kube_registry_pre }}gcr.io/google_containers/metrics-server-amd64"
+local_volume_provisioner_image_repo: "{{ kube_registry_pre }}quay.io/external_storage/local-volume-provisioner"
+cephfs_provisioner_image_repo: "{{ kube_registry_pre }}quay.io/external_storage/cephfs-provisioner"
+rbd_provisioner_image_repo: "{{ kube_registry_pre }}quay.io/external_storage/rbd-provisioner"
+local_path_provisioner_image_repo: "{{ kube_registry_pre }}docker.io/rancher/local-path-provisioner"
+ingress_nginx_controller_image_repo: "{{ kube_registry_pre }}quay.io/kubernetes-ingress-controller/nginx-ingress-controller"
+cert_manager_controller_image_repo: "{{ kube_registry_pre }}quay.io/jetstack/cert-manager-controller"
+addon_resizer_image_repo: "{{ kube_registry_pre }}k8s.gcr.io/addon-resizer"
+nginx_image_repo: "{{ kube_registry_pre }}docker.io/nginx"
+dashboard_image_repo: "{{ kube_registry_pre }}gcr.io/google_containers/kubernetes-dashboard-{{ image_arch  }}"
+dnsautoscaler_image_repo: "{{ kube_registry_pre }}k8s.gcr.io/cluster-proportional-autoscaler-{{ image_arch  }}"
+pod_infra_image_repo: "{{ kube_registry_pre }}gcr.io/google_containers/pause-{{ image_arch  }}"

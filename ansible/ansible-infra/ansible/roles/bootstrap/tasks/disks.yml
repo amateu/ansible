@@ -1,0 +1,34 @@
+---
+
+# Localvolume disks
+- name: "Set disk parted rule when disk_parted_rule is defined"
+  set_fact:
+    matched_rule: '{{ disk_parted_rules.get(disk_parted_rule) }}'
+  when:
+    - disk_parted_rules is defined
+    - disk_parted_rule is defined and disk_parted_rules.get(disk_parted_rule)
+  tags: disks
+
+- name: "Set disk parted rule when rules match deployment_mode"
+  set_fact:
+    matched_rule: '{{ disk_parted_rules.get(deployment_mode) }}'
+  when:
+    - disk_parted_rules is defined
+    - deployment_mode is defined and disk_parted_rules.get(deployment_mode)
+  tags: disks
+
+- name: "Disk | Install parted"
+  package:
+    name: parted
+    state: present
+  when: matched_rule is defined
+  tags: disks
+
+- name: "Disk | Parted each disk within rules"
+  include: disks_parted.yml disk={{ item }}
+  with_items: '{{ matched_rule }}'
+  when: matched_rule is defined
+  tags: disks
+
+- name: "Disk | Bind mount"
+  import_tasks: bind_mount_disks.yml

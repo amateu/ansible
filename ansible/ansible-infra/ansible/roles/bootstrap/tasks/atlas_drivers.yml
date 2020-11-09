@@ -1,0 +1,56 @@
+- name: "kernel | unarchive atlas drivers package for npu node"
+  unarchive:
+    src: "{{ atlas_drivers_download_url }}"
+    dest: "/tmp/"
+    remote_src: yes
+  when: is_kube_npu
+  tags: install_atlas
+
+- name: "kernel | check atlas drivers for npu node"
+  shell: "grep '{{ atlas_driver_version }}' /usr/local/HiAI/version.info"
+  register: atlas_drivers_check
+  when: is_kube_npu
+  ignore_errors: true
+  tags: install_atlas
+
+
+- name: "kernel | install atlas drivers for npu node"
+  shell: "(echo y; echo y; ) | /tmp/{{ atlas_drivers }}.run --full"
+  when:
+    - is_kube_npu
+    - atlas_drivers_check.rc != 0
+  tags: install_atlas
+
+- name: "kernel | reboot if atlas driver changed"
+  shell: sleep 2 && /sbin/shutdown -r now "System reboot by bootrap tasks kernel.yml for kernel_installed"
+  async: 1
+  poll: 0
+  when:
+    - is_kube_npu
+    - reboot_when_cuda_changed == "y"
+    - atlas_drivers_check.rc != 0
+  tags: install_atlas
+
+- name: "kernel | wait {{ wait_reboot_timeout }} seconds for all nodes's port 22 to become open"
+  wait_for:
+    host: "{{ ansible_host }}"
+    port: 22
+    delay: "{{ wait_reboot_delay }}"
+    timeout: "{{ wait_reboot_timeout }}"
+  connection: local
+  when: is_kube_npu
+  tags: install_atlas
+
+- name: "kernel | makesure atlas core device files exist"
+  file:
+    path: "{{ item }}"
+  with_items:
+    - "/dev/davinci0"
+    - "/dev/davinci_manager"
+  when: is_kube_npu
+  tags: ['check', 'atlas']
+
+- name: "kernel | makesure npu-smi work properly"
+  command: "npu-smi info"
+  when: is_kube_npu
+  tags: ['check', 'atlas']

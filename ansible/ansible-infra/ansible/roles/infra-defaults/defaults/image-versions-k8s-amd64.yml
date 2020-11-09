@@ -1,0 +1,49 @@
+---
+
+# if you want to change k8s images version, you should change the configfile in kubespray/roles/download/defaults/main.yml
+kube_apiserver_image_version:                        kubespray/gcr.io/google-containers/kube-apiserver:v1.15.9
+kube_proxy_image_version:                            kubespray/gcr.io/google-containers/kube-proxy:v1.15.9
+kube_controller_manager_image_version:               kubespray/gcr.io/google-containers/kube-controller-manager:v1.15.9
+kube_scheduler_image_version:                        kubespray/gcr.io/google-containers/kube-scheduler:v1.15.9
+pause_image_version:                                 kubespray/gcr.io/google-containers/pause:3.1
+pause_image_version_arch:                            kubespray/gcr.io/google_containers/pause-amd64:3.1
+flannel_image_version:                               kubespray/quay.io/coreos/flannel:v0.11.0
+flannel_cni_image_version:                           kubespray/quay.io/coreos/flannel-cni:v0.3.0
+etcd_image_version:                                  kubespray/quay.io/coreos/etcd:v3.3.10
+netcheck_agent_image_version:                        kubespray/quay.io/l23network/k8s-netchecker-agent:v1.0
+netcheck_server_image_version:                       kubespray/quay.io/l23network/k8s-netchecker-server:v1.0
+coredns_image_version:                               kubespray/docker.io/coredns/coredns:1.6.0
+nodelocaldns_image_version:                          kubespray/k8s.gcr.io/k8s-dns-node-cache:1.15.8
+dns_autoscaler_image_version:                        kubespray/k8s.gcr.io/cluster-proportional-autoscaler-amd64:1.6.0
+dashboard_image_version:                             kubespray/gcr.io/google_containers/kubernetes-dashboard-amd64:v1.10.1
+nginx_image_version:                                 kubespray/docker.io/nginx:1.17
+local_path_provi_image_version:                      kubespray/docker.io/rancher/local-path-provisioner:v0.0.2
+local_volume_provisioner:                            kubespray/quay.io/external_storage/local-volume-provisioner:v2.3.2
+calico_contollers_version:                           kubespray/docker.io/calico/kube-controllers:v3.7.3
+helm_image_version:                                  kubespray/docker.io/lachlanevenson/k8s-helm:v3.1.0
+
+
+# If you modify infra/kube-prometheus version, you need to modify it here.
+# Go to kube-prometheus dir, run:
+# aa=`./format-images.sh | grep 'docker pull' | awk '{print $NF}' | sort | cat`; bb=`grep 'registry.sensetime.com' -R ./manifests | awk '{print $NF}' |  sed 's|.*registry.sensetime.com/||g' | sort | uniq | cat`; printf "$aa\n$bb\n" | sort | uniq | grep ':'
+grafana_version:                         kubespray/docker.io/grafana/grafana:6.7.2
+kube_addon_resizer_version:              kubespray/quay.io/coreos/addon-resizer:1.0
+prometheus_configmap_reload_version:     kubespray/quay.io/coreos/configmap-reload:v0.0.1
+prometheus_adapter_version:              kubespray/quay.io/coreos/k8s-prometheus-adapter-amd64:v0.4.1
+kube_rbac_proxy_version:                 kubespray/quay.io/coreos/kube-rbac-proxy:v0.3.1
+kube_state_metrics_version:              kubespray/quay.io/coreos/kube-state-metrics:v1.3.1
+prometheus_config_reloader_version:      kubespray/quay.io/coreos/prometheus-config-reloader:v0.29.0
+prometheus_operator_version:             kubespray/quay.io/coreos/prometheus-operator:v0.29.0
+alertmanager_version:                    kubespray/quay.io/prometheus/alertmanager:v0.15.3
+node_exporter_version:                   kubespray/quay.io/prometheus/node-exporter:v1.0.0-rc
+prometheus_version:                      kubespray/quay.io/prometheus/prometheus:v2.4.3
+burrow_version:                          docker.io/solsson/burrow:v1.0.0
+burrow_exporter_version:                 docker.io/solsson/burrow-exporter:api-v3
+k8s_device_plugin_version:               docker.io/nvidia/k8s-device-plugin:1.11
+kong_version:                            infra/kong:1.4.1
+kong_ingress_controller_version:         infra/kong-ingress-controller:0.5.0-6e49007
+prometheus_builder_version:              infra/kube-prometheus-builder-v2.4.3:f4aa42b-amd64
+dcgm_exporter_version:                   kubespray/nvidia/dcgm-exporter:1.7.2-2.0.0-rc.6-ubi8
+
+# Certificate Utilities are used to build truststore and keystore for certificates
+certificate_utilities_version:           infra/certutils:1.4

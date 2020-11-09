@@ -1,0 +1,32 @@
+---
+- name: Clean yum metadata
+  command: yum clean metadata
+  args:
+    warn: no
+
+- name: SSH | restart sshd
+  command: /bin/true
+  notify:
+    - SSH | reload systemd
+    - SSH | restart ssh
+    - SSH | pause while ssh restarts
+    - SSH | wait for ssh
+
+- name: SSH | reload systemd
+  shell: systemctl daemon-reload
+
+- name: SSH | restart ssh
+  service:
+    name: sshd
+    state: restarted
+
+- name: SSH | pause while ssh restarts
+  pause:
+    seconds: 1
+    prompt: "Waiting for ssh restart"
+
+- name: SSH | wait for ssh
+  wait_for:
+    port: 22
+    state: started
+    delay: 2

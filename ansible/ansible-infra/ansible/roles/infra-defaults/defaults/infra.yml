@@ -1,0 +1,29 @@
+---
+default_disk_parted_rules: []
+default_bmount_disk_parted_rules: []
+
+default_keepalived:
+  controller_virtual_router_id: 100
+  engine_stream_virtual_router_id: 101
+
+default_kong_controllers: []
+
+default_namespaces:
+  - "default"
+  - "{{ ingress_namespace }}"
+  - "{{ prometheus_namespace }}"
+  - "{{ logging_namespace }}"
+
+default_node_groups_labels:
+  - group: 'controllers'
+    labels:
+      viper.sensetime.com/node-controllers: "True"
+  - group: 'devops'
+    labels:
+      viper.sensetime.com/node-devops: "True"
+  - group: 'components'
+    labels:
+      viper.sensetime.com/node-components: "True"
+  - group: 'kube-gpu'
+    labels:
+      viper.sensetime.com/node-gpu: "True"

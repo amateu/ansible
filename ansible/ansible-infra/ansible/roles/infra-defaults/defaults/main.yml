@@ -1,0 +1,84 @@
+---
+###
+###  In this variable definition file, we can override some kubespray/ceph vars. User still can override us in group_vars/all.yml
+###
+
+deployment_mode: 'foundry'
+https_sign_category: 'standard'
+
+# Base Yum & Docker endpoint
+docker_registry: "registry.sensetime.com"
+yum_repository: "http://sz.viper.sensesecurity.net/yum30"
+
+# Yum repository
+#centos_yum_repository: "{{ yum_repository }}/centos"
+#epel_yum_repository: "{{ yum_repository }}/epel"
+#docker_yum_repository: "{{ yum_repository }}/docker-ce"
+#nvidia_docker_yum_repository: "{{ yum_repository }}/nvidia-docker"
+#cuda_yum_repository: "{{ yum_repository }}/cuda"
+#infra_yum_repository: "{{ yum_repository }}/infra-yum"
+#kernel_yum_repository: "{{ yum_repository }}/kernel"
+
+# Registry
+kubespray_registry: "{{ docker_registry }}"
+
+docker_insecure_registries:
+  - "{{ kubespray_registry }}"
+
+# docker auth
+docker_auth_username: viper-robot
+docker_auth_passowrd: uayaeCh8
+
+cuda_drivers_version: "418.67"
+kernel_name: kernel
+kernel_version: "{% if host_architecture == 'amd64' %}4.19.43-300.el7.x86_64{% else %}4.18.0-80.7.2.el7.aarch64{% endif %}"
+
+# Namespace
+system_namespace: kube-system
+ingress_namespace: ingress
+prometheus_namespace: monitoring
+logging_namespace: logging
+addons_namespace: addons
+
+# Addons Dir
+addons_config_dir: "{{ kube_config_dir }}/addons"
+monitoring_config_dir: "{{ addons_config_dir }}/{{ prometheus_namespace }}"
+logging_config_dir: "{{ addons_config_dir }}/{{ logging_namespace }}"
+ingress_config_dir: "{{ addons_config_dir }}/{{ ingress_namespace }}"
+
+keepalived_config_dir: "/etc/keepalived"
+
+controller_ha_enable: false
+# controller_vip: xxx.xxx.xx.xx/xx
+# controller_ha_interface: eth100
+engine_stream_ha_enable: false
+# engine_stream_vip: yyy.yyy.yy.yy/yy
+# engine_stream_ha_interface: eth100
+
+node_port_netchecker: 30904
+
+# Wait Node Ready
+node_ready_retries: 180
+node_ready_delay: 10
+
+addons_logging_enabled: false # Disabled logging module from v2.1(default)
+
+full_attribute_enabled: false
+
+kube_controller_node_monitor_period: 10s
+kube_controller_node_monitor_grace_period: 60s
+kube_controller_pod_eviction_timeout: 120s
+
+viper_script_dir: "/usr/local/bin/viper-scripts"
+
+common_required_pkgs:
+  - "{{ (ansible_distribution == 'openSUSE Tumbleweed') | ternary('openssl-1_1', 'openssl') }}"
+  - curl
+  - socat
+  - unzip
+  - e2fsprogs
+  - xfsprogs
+
+# atlas driver
+atlas_driver_version: "V100R001C30B896"
+atlas_device_plugin_version: "/kubespray/arm64/k8s-device-plugin:atlas-310-1.0"
