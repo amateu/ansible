@@ -5,3 +5,45 @@
     tags: [ 'always' ]
 
 # init local first
+- hosts: controllers[0]
+  become: false
+  roles:
+    - { role: infra-defaults }
+  tasks:
+    - name: "hostname | Set hostname now & permanently"
+      hostname:
+        name: "{{ inventory_hostname }}"
+    - name: import bootstrap/tasks/yum_repository.yml
+      import_role:
+        name: bootstrap
+        tasks_from: yum_repository
+    - name: import bootstrap/tasks/kernel_version.yml
+      import_role:
+        name: bootstrap
+        tasks_from: kernel_version
+
+    - name: import bootstrap/tasks/nvidia_drivers.yml
+      import_role:
+        name: bootstrap
+        tasks_from: nvidia_drivers
+      when: is_kube_gpu
+
+#    - name: import bootstrap/tasks/atlas_drivers.yml
+#      import_role:
+#        name: bootstrap
+#        tasks_from: atlas_drivers
+#      when: is_kube_npu
+
+    - name: import bootstrap/tasks/iptables.yml
+      import_role:
+        name: bootstrap
+        tasks_from: iptables
+  tags: ['init']
+
+# prepare
+- hosts: nodes
+  roles:
+    - { role: bootstrap }
+    - { role: cis, tags: ['cis'] }
+  tags: ['prepare']
+
