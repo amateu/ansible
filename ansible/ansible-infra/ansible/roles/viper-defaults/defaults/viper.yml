@@ -1,0 +1,1643 @@
+---
+default_disk_parted_rules:
+  controllers-disks:
+    - name: /dev/sdb
+      parts:
+        - bdev: /dev/sdb1
+          capacity:
+            start: 1MB
+            end: 1998000MB          # 2T
+          path: /mnt/locals/kafkas/volume0
+    - name: /dev/sdc
+      parts:
+        - bdev: /dev/sdc1
+          capacity:
+            start: 1MB
+            end: 1998000MB           # 2T
+          path: /mnt/locals/kafkas/volume1
+    - name: /dev/sdd
+      parts:
+        - bdev: /dev/sdd1
+          capacity:
+            start: 1MB
+            end: 199800MB           # 10% of total disk
+          path: /mnt/locals/monitoring-prometheus/volume0
+        - bdev: /dev/sdd2
+          capacity:
+            start: 199800MB
+            end: 399600MB           # 10% of total disk
+          path: /mnt/locals/monitoring-alertmanager/volume0
+        - bdev: /dev/sdd3
+          capacity:
+            start: 399600MB
+            end: 1998000MB          # 80% of total disk
+          path: /mnt/locals/logging-elasticsearch/volume0
+
+    - name: /dev/sde
+      parts:
+        - bdev: /dev/sde1
+          capacity:
+            start: 1MB
+            end: 1499500MB          # 1.5T
+          path: /mnt/locals/minio/volume0
+        - bdev: /dev/sde2
+          capacity:
+            start: 1499500MB
+            end: 1699500MB        # 200G
+          path: /mnt/locals/cassandras-commitlog/volume0
+        - bdev: /dev/sde3
+          capacity:
+            start: 1699500MB
+            end: 1970000MB        # 290G
+          path: /mnt/locals/cassandras-data/volume1
+        - bdev: /dev/sde4
+          capacity:
+            start: 1970000MB
+            end: 1990000MB        # 10G
+          path: /mnt/locals/zookeepers/volume0
+    - name: /dev/sdf
+      parts:
+        - bdev: /dev/sdf1
+          capacity:
+            start: 1MB
+            end: 1499500MB           # 1.5T
+          path: /mnt/locals/minio/volume1
+        - bdev: /dev/sdf2
+          capacity:
+            start: 1499500MB
+            end: 1510500MB          # 10GB
+          path: /mnt/locals/hadoop-namenode-metadata/volume0
+        - bdev: /dev/sdf3
+          capacity:
+            start: 1510500MB
+            end: 1521500MB          # 10GB
+          path: /mnt/locals/hadoop-journalnode-editor/volume0
+    - name: /dev/sdg
+      parts:
+        - bdev: /dev/sdg1
+          capacity:
+            start: 1MB
+            end: 499500MB           # 500G
+          path: /mnt/locals/mysql/volume1
+        - bdev: /dev/sdg2
+          capacity:
+            start: 499500MB
+            end: 999500MB          # 500GB
+          path: /mnt/locals/model-manager/volume0
+
+  engine-db-p4-8-disks:
+    - name: /dev/sdb
+      parts:
+        - bdev: /dev/sdb1
+          capacity:
+            start: 1MB
+            end: 1898000MB              # 1.9T
+          path: /mnt/locals/cassandras-data/volume1
+    - name: /dev/sdc
+      parts:
+        - bdev: /dev/sdc1
+          capacity:
+            start: 1MB
+            end: 1898000MB           # 1.9T
+          path: /mnt/locals/cassandras-data/volume2
+    - name: /dev/sdd
+      parts:
+        - bdev: /dev/sdd1
+          capacity:
+            start: 1MB
+            end: 1898000MB           # 1.9T
+          path: /mnt/locals/cassandras-data/volume3
+    - name: /dev/sde
+      parts:
+        - bdev: /dev/sde1
+          capacity:
+            start: 1MB
+            end: 1898000MB           # 1.9T
+          path: /mnt/locals/cassandras-data/volume4
+    - name: /dev/sdf
+      parts:
+        - bdev: /dev/sdf1
+          capacity:
+            start: 1MB
+            end: 1898000MB           # 1.9T
+          path: /mnt/locals/structdb-elasticsearch/volume0
+    - name: /dev/sdg
+      parts:
+        - bdev: /dev/sdg1
+          capacity:
+            start: 1MB
+            end: 1898000MB           # 1.9T
+          path: /mnt/locals/structdb-elasticsearch/volume1
+    - name: /dev/sdh
+      parts:
+        - bdev: /dev/sdh1
+          capacity:
+            start: 1MB
+            end: 1898000MB           # 1.9T
+          path: /mnt/locals/structdb-elasticsearch/volume2
+    - name: /dev/sdi
+      parts:
+        - bdev: /dev/sdi1
+          capacity:
+            start: 1MB
+            end: 1898000MB           # 1.9T
+          path: /mnt/locals/structdb-elasticsearch/volume3
+
+    - name: /dev/sdj
+      parts:
+        - bdev: /dev/sdj1
+          capacity:
+            start: 1MB
+            end: 30000MB               # 30G
+          path: /mnt/locals/engine/volume0
+        - bdev: /dev/sdj2
+          capacity:
+            start: 30000MB
+            end: 60000MB               # 30G
+          path: /mnt/locals/engine/volume1
+        - bdev: /dev/sdj3
+          capacity:
+            start: 60000MB
+            end: 90000MB               # 30G
+          path: /mnt/locals/engine/volume2
+        - bdev: /dev/sdj4
+          capacity:
+            start: 90000MB
+            end: 120000MB               # 30G
+          path: /mnt/locals/engine/volume3
+        - bdev: /dev/sdj5
+          capacity:
+            start: 120000MB
+            end: 150000MB               # 30G
+          path: /mnt/locals/engine/volume4
+        - bdev: /dev/sdj6
+          capacity:
+            start: 150000MB
+            end: 180000MB               # 30G
+          path: /mnt/locals/engine/volume5
+        - bdev: /dev/sdj7
+          capacity:
+            start: 180000MB
+            end: 380000MB               # 200G
+          path: /mnt/locals/cassandras-commitlog/volume0
+
+  engine-db-t4-4-disks:
+    - name: /dev/sdb
+      parts:
+        - bdev: /dev/sdb1
+          capacity:
+            start: 1MB
+            end: 1898000MB              # 1.9T
+          path: /mnt/locals/cassandras-data/volume1
+    - name: /dev/sdc
+      parts:
+        - bdev: /dev/sdc1
+          capacity:
+            start: 1MB
+            end: 1898000MB           # 1.9T
+          path: /mnt/locals/cassandras-data/volume2
+    - name: /dev/sdd
+      parts:
+        - bdev: /dev/sdd1
+          capacity:
+            start: 1MB
+            end: 1898000MB           # 1.9T
+          path: /mnt/locals/cassandras-data/volume3
+    - name: /dev/sde
+      parts:
+        - bdev: /dev/sde1
+          capacity:
+            start: 1MB
+            end: 1898000MB           # 1.9T
+          path: /mnt/locals/cassandras-data/volume4
+    - name: /dev/sdf
+      parts:
+        - bdev: /dev/sdf1
+          capacity:
+            start: 1MB
+            end: 1898000MB           # 1.9T
+          path: /mnt/locals/structdb-elasticsearch/volume0
+    - name: /dev/sdg
+      parts:
+        - bdev: /dev/sdg1
+          capacity:
+            start: 1MB
+            end: 1898000MB           # 1.9T
+          path: /mnt/locals/structdb-elasticsearch/volume1
+    - name: /dev/sdh
+      parts:
+        - bdev: /dev/sdh1
+          capacity:
+            start: 1MB
+            end: 1898000MB           # 1.9T
+          path: /mnt/locals/structdb-elasticsearch/volume2
+    - name: /dev/sdi
+      parts:
+        - bdev: /dev/sdi1
+          capacity:
+            start: 1MB
+            end: 1898000MB           # 1.9T
+          path: /mnt/locals/structdb-elasticsearch/volume3
+
+    - name: /dev/sdj
+      parts:
+        - bdev: /dev/sdj1
+          capacity:
+            start: 1MB
+            end: 30000MB               # 30G
+          path: /mnt/locals/engine/volume0
+        - bdev: /dev/sdj2
+          capacity:
+            start: 30000MB
+            end: 60000MB               # 30G
+          path: /mnt/locals/engine/volume1
+        - bdev: /dev/sdj3
+          capacity:
+            start: 60000MB
+            end: 90000MB               # 30G
+          path: /mnt/locals/engine/volume2
+        - bdev: /dev/sdj4
+          capacity:
+            start: 90000MB
+            end: 120000MB               # 30G
+          path: /mnt/locals/engine/volume3
+        - bdev: /dev/sdj5
+          capacity:
+            start: 120000MB
+            end: 150000MB               # 30G
+          path: /mnt/locals/engine/volume4
+        - bdev: /dev/sdj6
+          capacity:
+            start: 150000MB
+            end: 180000MB               # 30G
+          path: /mnt/locals/engine/volume5
+        - bdev: /dev/sdj7
+          capacity:
+            start: 180000MB
+            end: 380000MB               # 200G
+          path: /mnt/locals/cassandras-commitlog/volume0
+
+  engine-db-t4-8-disks:
+    - name: /dev/sdb
+      parts:
+        - bdev: /dev/sdb1
+          capacity:
+            start: 1MB
+            end: 3796000MB              # 3.8T
+          path: /mnt/locals/cassandras-data/volume1
+    - name: /dev/sdc
+      parts:
+        - bdev: /dev/sdc1
+          capacity:
+            start: 1MB
+            end: 3796000MB              # 3.8T
+          path: /mnt/locals/cassandras-data/volume2
+    - name: /dev/sdd
+      parts:
+        - bdev: /dev/sdd1
+          capacity:
+            start: 1MB
+            end: 3796000MB              # 3.8T
+          path: /mnt/locals/cassandras-data/volume3
+    - name: /dev/sde
+      parts:
+        - bdev: /dev/sde1
+          capacity:
+            start: 1MB
+            end: 3796000MB              # 3.8T
+          path: /mnt/locals/cassandras-data/volume4
+    - name: /dev/sdf
+      parts:
+        - bdev: /dev/sdf1
+          capacity:
+            start: 1MB
+            end: 3796000MB              # 3.8T
+          path: /mnt/locals/structdb-elasticsearch/volume0
+    - name: /dev/sdg
+      parts:
+        - bdev: /dev/sdg1
+          capacity:
+            start: 1MB
+            end: 3796000MB              # 3.8T
+          path: /mnt/locals/structdb-elasticsearch/volume1
+    - name: /dev/sdh
+      parts:
+        - bdev: /dev/sdh1
+          capacity:
+            start: 1MB
+            end: 3796000MB              # 3.8T
+          path: /mnt/locals/structdb-elasticsearch/volume2
+    - name: /dev/sdi
+      parts:
+        - bdev: /dev/sdi1
+          capacity:
+            start: 1MB
+            end: 3796000MB              # 3.8T
+          path: /mnt/locals/structdb-elasticsearch/volume3
+    - name: /dev/sdj
+      parts:
+        - bdev: /dev/sdj1
+          capacity:
+            start: 1MB
+            end: 30000MB               # 30G
+          path: /mnt/locals/engine/volume0
+        - bdev: /dev/sdj2
+          capacity:
+            start: 30000MB
+            end: 60000MB               # 30G
+          path: /mnt/locals/engine/volume1
+        - bdev: /dev/sdj3
+          capacity:
+            start: 60000MB
+            end: 90000MB               # 30G
+          path: /mnt/locals/engine/volume2
+        - bdev: /dev/sdj4
+          capacity:
+            start: 90000MB
+            end: 120000MB               # 30G
+          path: /mnt/locals/engine/volume3
+        - bdev: /dev/sdj5
+          capacity:
+            start: 120000MB
+            end: 150000MB               # 30G
+          path: /mnt/locals/engine/volume4
+        - bdev: /dev/sdj6
+          capacity:
+            start: 150000MB
+            end: 180000MB               # 30G
+          path: /mnt/locals/engine/volume5
+        - bdev: /dev/sdj7
+          capacity:
+            start: 180000MB
+            end: 380000MB               # 200G
+          path: /mnt/locals/cassandras-commitlog/volume0
+
+  engine-db-p4-4-disks:
+    - name: /dev/sdb
+      parts:
+        - bdev: /dev/sdb1
+          capacity:
+            start: 1MB
+            end: 998000MB              # 0.9T
+          path: /mnt/locals/cassandras-data/volume1
+        - bdev: /dev/sdb2
+          capacity:
+            start: 998000MB
+            end: 1898000MB           # 0.9T
+          path: /mnt/locals/cassandras-data/volume2
+    - name: /dev/sdc
+      parts:
+        - bdev: /dev/sdc1
+          capacity:
+            start: 1MB
+            end: 998000MB              # 0.9T
+          path: /mnt/locals/cassandras-data/volume3
+        - bdev: /dev/sdc2
+          capacity:
+            start: 998000MB
+            end: 1898000MB           # 0.9T
+          path: /mnt/locals/cassandras-data/volume4
+    - name: /dev/sdd
+      parts:
+        - bdev: /dev/sdd1
+          capacity:
+            start: 1MB
+            end: 998000MB              # 0.9T
+          path: /mnt/locals/structdb-elasticsearch/volume0
+        - bdev: /dev/sdd2
+          capacity:
+            start: 998000MB
+            end: 1898000MB           # 0.9T
+          path: /mnt/locals/structdb-elasticsearch/volume1
+    - name: /dev/sde
+      parts:
+        - bdev: /dev/sde1
+          capacity:
+            start: 1MB
+            end: 998000MB              # 0.9T
+          path: /mnt/locals/structdb-elasticsearch/volume2
+        - bdev: /dev/sde2
+          capacity:
+            start: 998000MB
+            end: 1898000MB           # 0.9T
+          path: /mnt/locals/structdb-elasticsearch/volume3
+
+    - name: /dev/sdj
+      parts:
+        - bdev: /dev/sdj1
+          capacity:
+            start: 1MB
+            end: 30000MB               # 30G
+          path: /mnt/locals/engine/volume0
+        - bdev: /dev/sdj2
+          capacity:
+            start: 30000MB
+            end: 60000MB               # 30G
+          path: /mnt/locals/engine/volume1
+        - bdev: /dev/sdj3
+          capacity:
+            start: 60000MB
+            end: 90000MB               # 30G
+          path: /mnt/locals/engine/volume2
+        - bdev: /dev/sdj4
+          capacity:
+            start: 90000MB
+            end: 120000MB               # 30G
+          path: /mnt/locals/engine/volume3
+        - bdev: /dev/sdj5
+          capacity:
+            start: 120000MB
+            end: 150000MB               # 30G
+          path: /mnt/locals/engine/volume4
+        - bdev: /dev/sdj6
+          capacity:
+            start: 150000MB
+            end: 180000MB               # 30G
+          path: /mnt/locals/engine/volume5
+        - bdev: /dev/sdj7
+          capacity:
+            start: 180000MB
+            end: 380000MB               # 200G
+          path: /mnt/locals/cassandras-commitlog/volume0
+
+  engine-db-t4-2-disks:
+    - name: /dev/sdb
+      parts:
+        - bdev: /dev/sdb1
+          capacity:
+            start: 1MB
+            end: 998000MB              # 0.9T
+          path: /mnt/locals/cassandras-data/volume1
+        - bdev: /dev/sdb2
+          capacity:
+            start: 998000MB
+            end: 1898000MB           # 0.9T
+          path: /mnt/locals/cassandras-data/volume2
+    - name: /dev/sdc
+      parts:
+        - bdev: /dev/sdc1
+          capacity:
+            start: 1MB
+            end: 998000MB              # 0.9T
+          path: /mnt/locals/cassandras-data/volume3
+        - bdev: /dev/sdc2
+          capacity:
+            start: 998000MB
+            end: 1898000MB           # 0.9T
+          path: /mnt/locals/cassandras-data/volume4
+    - name: /dev/sdd
+      parts:
+        - bdev: /dev/sdd1
+          capacity:
+            start: 1MB
+            end: 998000MB              # 0.9T
+          path: /mnt/locals/structdb-elasticsearch/volume0
+        - bdev: /dev/sdd2
+          capacity:
+            start: 998000MB
+            end: 1898000MB           # 0.9T
+          path: /mnt/locals/structdb-elasticsearch/volume1
+    - name: /dev/sde
+      parts:
+        - bdev: /dev/sde1
+          capacity:
+            start: 1MB
+            end: 998000MB              # 0.9T
+          path: /mnt/locals/structdb-elasticsearch/volume2
+        - bdev: /dev/sde2
+          capacity:
+            start: 998000MB
+            end: 1898000MB           # 0.9T
+          path: /mnt/locals/structdb-elasticsearch/volume3
+
+    - name: /dev/sdj
+      parts:
+        - bdev: /dev/sdj1
+          capacity:
+            start: 1MB
+            end: 30000MB               # 30G
+          path: /mnt/locals/engine/volume0
+        - bdev: /dev/sdj2
+          capacity:
+            start: 30000MB
+            end: 60000MB               # 30G
+          path: /mnt/locals/engine/volume1
+        - bdev: /dev/sdj3
+          capacity:
+            start: 60000MB
+            end: 90000MB               # 30G
+          path: /mnt/locals/engine/volume2
+        - bdev: /dev/sdj4
+          capacity:
+            start: 90000MB
+            end: 120000MB               # 30G
+          path: /mnt/locals/engine/volume3
+        - bdev: /dev/sdj5
+          capacity:
+            start: 120000MB
+            end: 150000MB               # 30G
+          path: /mnt/locals/engine/volume4
+        - bdev: /dev/sdj6
+          capacity:
+            start: 150000MB
+            end: 180000MB               # 30G
+          path: /mnt/locals/engine/volume5
+        - bdev: /dev/sdj7
+          capacity:
+            start: 180000MB
+            end: 380000MB               # 200G
+          path: /mnt/locals/cassandras-commitlog/volume0
+
+  engine-stream-offline-p4-4-disks: # origin d-4-disks
+    - name: /dev/sdb
+      parts:
+        - bdev: /dev/sdb1
+          capacity:
+            start: 1MB
+            end: 6000000MB                          # 6T
+          path: /mnt/locals/hadoop-datanode-data/volume0
+
+  engine-stream-offline-t4-4-disks:
+    - name: /dev/sdb
+      parts:
+        - bdev: /dev/sdb1
+          capacity:
+            start: 1MB
+            end: 3750000MB                         # 3.8T
+          path: /mnt/locals/hadoop-datanode-data/volume0
+
+  data-fusion-p4-4-disks: # origin d-0-disks
+    - name: /dev/sdb
+      parts:
+        - bdev: /dev/sdb1
+          capacity:
+            start: 1MB
+            end: 6000000MB                          # 6T
+          path: /mnt/locals/hadoop-datanode-data/volume0
+    - name: /dev/sdc
+      parts:
+        - bdev: /dev/sdc1
+          capacity:
+            start: 1MB
+            end: 6000000MB                          # 6T
+          path: /mnt/locals/datafusion-elasticsearch/volume0
+
+  data-fusion-t4-4-disks:
+    - name: /dev/sdb
+      parts:
+        - bdev: /dev/sdb1
+          capacity:
+            start: 1MB
+            end: 3600000MB               # 3.6T
+          path: /mnt/locals/hadoop-datanode-data/volume0
+        - bdev: /dev/sdb2
+          capacity:
+            start: 3600000MB
+            end: 3630000MB               # 30G
+          path: /mnt/locals/engine/volume0
+        - bdev: /dev/sdb3
+          capacity:
+            start: 3630000MB
+            end: 3660000MB               # 30G
+          path: /mnt/locals/engine/volume1
+        - bdev: /dev/sdb4
+          capacity:
+            start: 3660000MB
+            end: 3690000MB               # 30G
+          path: /mnt/locals/engine/volume2
+        - bdev: /dev/sdb5
+          capacity:
+            start: 3690000MB
+            end: 3720000MB               # 30G
+          path: /mnt/locals/engine/volume3
+    - name: /dev/sdc
+      parts:
+        - bdev: /dev/sdc1
+          capacity:
+            start: 1MB
+            end: 3600000MB           # 3.84T
+          path: /mnt/locals/datafusion-elasticsearch/volume0
+    - name: /dev/sdd
+      parts:
+        - bdev: /dev/sdd1
+          capacity:
+            start: 1MB
+            end: 3600000MB           # 3.84T
+          path: /mnt/locals/kafkas/volume0
+    - name: /dev/sde
+      parts:
+        - bdev: /dev/sde1
+          capacity:
+            start: 1MB
+            end: 200000MB              # 200G
+          path: /mnt/locals/cassandras-commitlog/volume0
+        - bdev: /dev/sde2
+          capacity:
+            start: 200000MB
+            end: 3600000MB               # 3.8T
+          path: /mnt/locals/cassandras-data/volume1
+    - name: /dev/sdf
+      parts:
+        - bdev: /dev/sdf1
+          capacity:
+            start: 1MB
+            end: 3600000MB           # 3.84T
+          path: /mnt/locals/cassandras-data/volume3
+    - name: /dev/sdg
+      parts:
+        - bdev: /dev/sdg1
+          capacity:
+            start: 1MB
+            end: 3600000MB           # 3.84T
+          path: /mnt/locals/cassandras-data/volume4
+    - name: /dev/sdh
+      parts:
+        - bdev: /dev/sdh1
+          capacity:
+            start: 1MB
+            end: 3600000MB           # 3.84T
+          path: /mnt/locals/cassandras-data/volume5
+    - name: /dev/sdi
+      parts:
+        - bdev: /dev/sdi1
+          capacity:
+            start: 1MB
+            end: 3600000MB           # 3.84T
+          path: /mnt/locals/cassandras-data/volume6
+    - name: /dev/sdj
+      parts:
+        - bdev: /dev/sdj1
+          capacity:
+            start: 1MB
+            end: 3600000MB           # 3.84T
+          path: /mnt/locals/cassandras-data/volume7
+    - name: /dev/sdk
+      parts:
+        - bdev: /dev/sdk1
+          capacity:
+            start: 1MB
+            end: 3600000MB           # 3.84T
+          path: /mnt/locals/cassandras-data/volume8
+
+  unity-va-ut-ff1001:
+    - parts:
+      - path: "/mnt/locals/monitoring-alertmanager/volume0"
+        bdev: "/dev/sdb1"
+        capacity:
+          start: 0MB
+          end: 10000MB
+      - path: "/mnt/locals/monitoring-prometheus/volume0"
+        bdev: "/dev/sdb2"
+        capacity:
+          start: 10000MB
+          end: 20000MB
+      - path: "/mnt/locals/cassandras-commitlog/volume0"
+        bdev: "/dev/sdb3"
+        capacity:
+          start: 20000MB
+          end: 90000MB
+      - path: "/mnt/locals/cassandras-data/volume1"
+        bdev: "/dev/sdb4"
+        capacity:
+          start: 90000MB
+          end: 500000MB
+      - path: "/mnt/locals/engine/volume0"
+        bdev: "/dev/sdb5"
+        capacity:
+          start: 500000MB
+          end: 530000MB
+      - path: "/mnt/locals/minio/volume0"
+        bdev: "/dev/sdb6"
+        capacity:
+          start: 530000MB
+          end: 550000MB
+      - path: "/mnt/locals/mysql/volume0"
+        bdev: "/dev/sdb7"
+        capacity:
+          start: 550000MB
+          end: 650000MB
+      - path: "/mnt/locals/model-manager/volume0"
+        bdev: "/dev/sdb8"
+        capacity:
+          start: 650000MB
+          end: 850000MB          # 200GB
+      name: "/dev/sdb"
+    - parts:
+      - path: "/nas"
+        bdev: "/dev/sdc1"
+        capacity:
+          start: 0MB
+          end: 6291456MB
+      name: "/dev/sdc"
+
+  unity-va-ut-ff1002:
+    - parts:
+      - path: "/mnt/locals/monitoring-alertmanager/volume0"
+        bdev: "/dev/sdb1"
+        capacity:
+          start: 0MB
+          end: 25600MB
+      - path: "/mnt/locals/monitoring-prometheus/volume0"
+        bdev: "/dev/sdb2"
+        capacity:
+          start: 25600MB
+          end: 51200MB
+      - path: "/mnt/locals/cassandras-commitlog/volume0"
+        bdev: "/dev/sdb3"
+        capacity:
+          start: 51200MB
+          end: 153600MB
+      - path: "/mnt/locals/cassandras-data/volume1"
+        bdev: "/dev/sdb4"
+        capacity:
+          start: 153600MB
+          end: 1459200MB
+      - path: "/mnt/locals/minio/volume0"
+        bdev: "/dev/sdb5"
+        capacity:
+          start: 1459200MB
+          end: 1612800MB
+      - path: "/mnt/locals/engine/volume0"
+        bdev: "/dev/sdb6"
+        capacity:
+          start: 1612800MB
+          end: 1643520MB
+      - path: "/mnt/locals/engine/volume1"
+        bdev: "/dev/sdb7"
+        capacity:
+          start: 1643520MB
+          end: 1674240MB
+      - path: "/mnt/locals/engine/volume2"
+        bdev: "/dev/sdb8"
+        capacity:
+          start: 1674240MB
+          end: 1704960MB
+      - path: "/mnt/locals/zookeepers/volume0"
+        bdev: "/dev/sdb9"
+        capacity:
+          start: 1704960MB
+          end: 1734960MB
+      - path: "/mnt/locals/mysql/volume0"
+        bdev: "/dev/sdb10"
+        capacity:
+          start: 1734960MB
+          end: 1934960MB
+      - path: "/mnt/locals/model-manager/volume0"
+        bdev: "/dev/sdb11"
+        capacity:
+          start: 1934960MB
+          end: 2134960MB          # 200GB
+      name: "/dev/sdb"
+
+  unity-va-ut-ff1003:
+    - parts:
+      - path: "/mnt/locals/monitoring-alertmanager/volume0"
+        bdev: "/dev/sdb1"
+        capacity:
+          start: 0MB
+          end: 25600MB
+      - path: "/mnt/locals/monitoring-prometheus/volume0"
+        bdev: "/dev/sdb2"
+        capacity:
+          start: 25600MB
+          end: 51200MB
+      - path: "/mnt/locals/cassandras-commitlog/volume0"
+        bdev: "/dev/sdb3"
+        capacity:
+          start: 51200MB
+          end: 153600MB
+      - path: "/mnt/locals/cassandras-data/volume1"
+        bdev: "/dev/sdb4"
+        capacity:
+          start: 153600MB
+          end: 2764800MB
+      - path: "/mnt/locals/minio/volume0"
+        bdev: "/dev/sdb5"
+        capacity:
+          start: 2764800MB
+          end: 3072000MB
+      - path: "/mnt/locals/engine/volume0"
+        bdev: "/dev/sdb6"
+        capacity:
+          start: 3072000MB
+          end: 3102720MB
+      - path: "/mnt/locals/engine/volume1"
+        bdev: "/dev/sdb7"
+        capacity:
+          start: 3102720MB
+          end: 3133440MB
+      - path: "/mnt/locals/engine/volume2"
+        bdev: "/dev/sdb8"
+        capacity:
+          start: 3133440MB
+          end: 3164160MB
+      - path: "/mnt/locals/engine/volume3"
+        bdev: "/dev/sdb9"
+        capacity:
+          start: 3164160MB
+          end: 3194880MB
+      - path: "/mnt/locals/engine/volume4"
+        bdev: "/dev/sdb10"
+        capacity:
+          start: 3194880MB
+          end: 3225600MB
+      - path: "/mnt/locals/engine/volume5"
+        bdev: "/dev/sdb11"
+        capacity:
+          start: 3225600MB
+          end: 3256320MB
+      - path: "/mnt/locals/zookeepers/volume0"
+        bdev: "/dev/sdb12"
+        capacity:
+          start: 3256320MB
+          end: 3306320MB
+      - path: "/mnt/locals/mysql/volume0"
+        bdev: "/dev/sdb13"
+        capacity:
+          start: 3306320MB
+          end: 3506320MB
+      - path: "/mnt/locals/model-manager/volume0"
+        bdev: "/dev/sdb14"
+        capacity:
+          start: 3506320MB
+          end: 3706320MB          # 200GB
+      name: "/dev/sdb"
+
+  unity-va-ut-ff2102:
+    - parts:
+      - path: "/mnt/locals/monitoring-alertmanager/volume0"
+        bdev: "/dev/sdb1"
+        capacity:
+          start: 0MB
+          end: 25600MB
+      - path: "/mnt/locals/monitoring-prometheus/volume0"
+        bdev: "/dev/sdb2"
+        capacity:
+          start: 25600MB
+          end: 51200MB
+      - path: "/mnt/locals/cassandras-commitlog/volume0"
+        bdev: "/dev/sdb3"
+        capacity:
+          start: 51200MB
+          end: 153600MB
+      - path: "/mnt/locals/cassandras-data/volume1"
+        bdev: "/dev/sdb4"
+        capacity:
+          start: 153600MB
+          end: 640000MB
+      - path: "/mnt/locals/minio/volume0"
+        bdev: "/dev/sdb5"
+        capacity:
+          start: 640000MB
+          end: 742400MB
+      - path: "/mnt/locals/engine/volume0"
+        bdev: "/dev/sdb6"
+        capacity:
+          start: 742400MB
+          end: 773120MB
+      - path: "/mnt/locals/kafkas/volume0"
+        bdev: "/dev/sdb7"
+        capacity:
+          start: 773120MB
+          end: 1080320MB
+      - path: "/mnt/locals/zookeepers/volume0"
+        bdev: "/dev/sdb8"
+        capacity:
+          start: 1080320MB
+          end: 1131520MB
+      - path: "/mnt/locals/mysql/volume0"
+        bdev: "/dev/sdb9"
+        capacity:
+          start: 1131520MB
+          end: 1331520MB
+      - path: "/mnt/locals/structdb-elasticsearch/volume0"
+        bdev: "/dev/sdb10"
+        capacity:
+          start: 1331520MB
+          end: 1831520MB
+      - path: "/mnt/locals/model-manager/volume0"
+        bdev: "/dev/sdb11"
+        capacity:
+          start: 1831520MB
+          end: 2131520MB          # 200GB
+      name: "/dev/sdb"
+
+  unity-va-ut-ff2103:
+    - parts:
+      - path: "/mnt/locals/monitoring-alertmanager/volume0"
+        bdev: "/dev/sdb1"
+        capacity:
+          start: 0MB
+          end: 25600MB
+      - path: "/mnt/locals/monitoring-prometheus/volume0"
+        bdev: "/dev/sdb2"
+        capacity:
+          start: 25600MB
+          end: 51200MB
+      - path: "/mnt/locals/cassandras-commitlog/volume0"
+        bdev: "/dev/sdb3"
+        capacity:
+          start: 51200MB
+          end: 153600MB
+      - path: "/mnt/locals/cassandras-data/volume1"
+        bdev: "/dev/sdb4"
+        capacity:
+          start: 153600MB
+          end: 1075200MB
+      - path: "/mnt/locals/minio/volume0"
+        bdev: "/dev/sdb5"
+        capacity:
+          start: 1075200MB
+          end: 1228800MB
+      - path: "/mnt/locals/engine/volume0"
+        bdev: "/dev/sdb6"
+        capacity:
+          start: 1228800MB
+          end: 1259520MB
+      - path: "/mnt/locals/kafkas/volume0"
+        bdev: "/dev/sdb7"
+        capacity:
+          start: 1259520MB
+          end: 1566720MB
+      - path: "/mnt/locals/zookeepers/volume0"
+        bdev: "/dev/sdb8"
+        capacity:
+          start: 1566720MB
+          end: 1617920MB
+      - path: "/mnt/locals/mysql/volume0"
+        bdev: "/dev/sdb9"
+        capacity:
+          start: 1617920MB
+          end: 1817920MB
+      - path: "/mnt/locals/structdb-elasticsearch/volume0"
+        bdev: "/dev/sdb10"
+        capacity:
+          start: 1817920MB
+          end: 2317920MB
+      - path: "/mnt/locals/model-manager/volume0"
+        bdev: "/dev/sdb11"
+        capacity:
+          start: 2317920MB
+          end: 2517920MB          # 200GB
+      name: "/dev/sdb"
+
+  unity-va-ut-ff2202:
+    - parts:
+      - path: "/mnt/locals/monitoring-alertmanager/volume0"
+        bdev: "/dev/sdb1"
+        capacity:
+          start: 0MB
+          end: 25600MB
+      - path: "/mnt/locals/monitoring-prometheus/volume0"
+        bdev: "/dev/sdb2"
+        capacity:
+          start: 25600MB
+          end: 51200MB
+      - path: "/mnt/locals/cassandras-commitlog/volume0"
+        bdev: "/dev/sdb3"
+        capacity:
+          start: 51200MB
+          end: 153600MB
+      - path: "/mnt/locals/cassandras-data/volume1"
+        bdev: "/dev/sdb4"
+        capacity:
+          start: 153600MB
+          end: 640000MB
+      - path: "/mnt/locals/minio/volume0"
+        bdev: "/dev/sdb5"
+        capacity:
+          start: 640000MB
+          end: 742400MB
+      - path: "/mnt/locals/engine/volume0"
+        bdev: "/dev/sdb6"
+        capacity:
+          start: 742400MB
+          end: 773120MB
+      - path: "/mnt/locals/kafkas/volume0"
+        bdev: "/dev/sdb7"
+        capacity:
+          start: 773120MB
+          end: 1080320MB
+      - path: "/mnt/locals/zookeepers/volume0"
+        bdev: "/dev/sdb8"
+        capacity:
+          start: 1080320MB
+          end: 1131520MB
+      - path: "/mnt/locals/mysql/volume0"
+        bdev: "/dev/sdb9"
+        capacity:
+          start: 1131520MB
+          end: 1331520MB
+      - path: "/mnt/locals/structdb-elasticsearch/volume0"
+        bdev: "/dev/sdb10"
+        capacity:
+          start: 1331520MB
+          end: 1831520MB
+      - path: "/mnt/locals/model-manager/volume0"
+        bdev: "/dev/sdb11"
+        capacity:
+          start: 1831520MB
+          end: 2131520MB          # 200GB
+      name: "/dev/sdb"
+
+  unity-va-ut-ff2203:
+    - parts:
+      - path: "/mnt/locals/monitoring-alertmanager/volume0"
+        bdev: "/dev/sdb1"
+        capacity:
+          start: 0MB
+          end: 25600MB
+      - path: "/mnt/locals/monitoring-prometheus/volume0"
+        bdev: "/dev/sdb2"
+        capacity:
+          start: 25600MB
+          end: 51200MB
+      - path: "/mnt/locals/cassandras-commitlog/volume0"
+        bdev: "/dev/sdb3"
+        capacity:
+          start: 51200MB
+          end: 153600MB
+      - path: "/mnt/locals/cassandras-data/volume1"
+        bdev: "/dev/sdb4"
+        capacity:
+          start: 153600MB
+          end: 640000MB
+      - path: "/mnt/locals/minio/volume0"
+        bdev: "/dev/sdb5"
+        capacity:
+          start: 640000MB
+          end: 742400MB
+      - path: "/mnt/locals/engine/volume0"
+        bdev: "/dev/sdb6"
+        capacity:
+          start: 742400MB
+          end: 773120MB
+      - path: "/mnt/locals/kafkas/volume0"
+        bdev: "/dev/sdb7"
+        capacity:
+          start: 773120MB
+          end: 1080320MB
+      - path: "/mnt/locals/zookeepers/volume0"
+        bdev: "/dev/sdb8"
+        capacity:
+          start: 1080320MB
+          end: 1131520MB
+      - path: "/mnt/locals/mysql/volume0"
+        bdev: "/dev/sdb9"
+        capacity:
+          start: 1131520MB
+          end: 1331520MB
+      - path: "/mnt/locals/structdb-elasticsearch/volume0"
+        bdev: "/dev/sdb10"
+        capacity:
+          start: 1331520MB
+          end: 1831520MB
+      - path: "/mnt/locals/model-manager/volume0"
+        bdev: "/dev/sdb11"
+        capacity:
+          start: 1831520MB
+          end: 2131520MB          # 200GB
+      name: "/dev/sdb"
+
+  unity-va-ut-ff2204:
+    - parts:
+      - path: "/mnt/locals/monitoring-alertmanager/volume0"
+        bdev: "/dev/sdb1"
+        capacity:
+          start: 0MB
+          end: 25600MB
+      - path: "/mnt/locals/monitoring-prometheus/volume0"
+        bdev: "/dev/sdb2"
+        capacity:
+          start: 25600MB
+          end: 51200MB
+      - path: "/mnt/locals/cassandras-commitlog/volume0"
+        bdev: "/dev/sdb3"
+        capacity:
+          start: 51200MB
+          end: 153600MB
+      - path: "/mnt/locals/cassandras-data/volume1"
+        bdev: "/dev/sdb4"
+        capacity:
+          start: 153600MB
+          end: 640000MB
+      - path: "/mnt/locals/minio/volume0"
+        bdev: "/dev/sdb5"
+        capacity:
+          start: 640000MB
+          end: 742400MB
+      - path: "/mnt/locals/engine/volume0"
+        bdev: "/dev/sdb6"
+        capacity:
+          start: 742400MB
+          end: 773120MB
+      - path: "/mnt/locals/kafkas/volume0"
+        bdev: "/dev/sdb7"
+        capacity:
+          start: 773120MB
+          end: 1080320MB
+      - path: "/mnt/locals/zookeepers/volume0"
+        bdev: "/dev/sdb8"
+        capacity:
+          start: 1080320MB
+          end: 1131520MB
+      - path: "/mnt/locals/mysql/volume0"
+        bdev: "/dev/sdb9"
+        capacity:
+          start: 1131520MB
+          end: 1331520MB
+      - path: "/mnt/locals/structdb-elasticsearch/volume0"
+        bdev: "/dev/sdb10"
+        capacity:
+          start: 1331520MB
+          end: 1831520MB
+      - path: "/mnt/locals/model-manager/volume0"
+        bdev: "/dev/sdb11"
+        capacity:
+          start: 1831520MB
+          end: 2131520MB          # 200GB
+      name: "/dev/sdb"
+    - parts:
+      - path: "/mnt/locals/osg/volume0"
+        bdev: "/dev/sdc1"
+        capacity:
+          start: 0MB
+          end: 41943040MB
+      name: "/dev/sdc"
+
+  unity-va-ut-ff2301:
+    - parts:
+      - path: "/mnt/locals/monitoring-alertmanager/volume0"
+        bdev: "/dev/sdb1"
+        capacity:
+          start: 0MB
+          end: 25600MB
+      - path: "/mnt/locals/monitoring-prometheus/volume0"
+        bdev: "/dev/sdb2"
+        capacity:
+          start: 25600MB
+          end: 51200MB
+      - path: "/mnt/locals/cassandras-commitlog/volume0"
+        bdev: "/dev/sdb3"
+        capacity:
+          start: 51200MB
+          end: 153600MB
+      - path: "/mnt/locals/cassandras-data/volume1"
+        bdev: "/dev/sdb4"
+        capacity:
+          start: 153600MB
+          end: 640000MB
+      - path: "/mnt/locals/minio/volume0"
+        bdev: "/dev/sdb5"
+        capacity:
+          start: 640000MB
+          end: 742400MB
+      - path: "/mnt/locals/engine/volume0"
+        bdev: "/dev/sdb6"
+        capacity:
+          start: 742400MB
+          end: 773120MB
+      - path: "/mnt/locals/kafkas/volume0"
+        bdev: "/dev/sdb7"
+        capacity:
+          start: 773120MB
+          end: 1080320MB
+      - path: "/mnt/locals/zookeepers/volume0"
+        bdev: "/dev/sdb8"
+        capacity:
+          start: 1080320MB
+          end: 1131520MB
+      - path: "/mnt/locals/mysql/volume0"
+        bdev: "/dev/sdb9"
+        capacity:
+          start: 1131520MB
+          end: 1331520MB
+      - path: "/mnt/locals/structdb-elasticsearch/volume0"
+        bdev: "/dev/sdb10"
+        capacity:
+          start: 1331520MB
+          end: 1831520MB
+      - path: "/mnt/locals/model-manager/volume0"
+        bdev: "/dev/sdb11"
+        capacity:
+          start: 1831520MB
+          end: 2131520MB          # 200GB
+      name: "/dev/sdb"
+
+  unity-va-ut-ffxxxx:
+    - parts:
+      - path: "/mnt/locals/monitoring-alertmanager/volume0"
+        bdev: "/dev/sdb1"
+        capacity:
+          start: 0MB
+          end: 25600MB
+      - path: "/mnt/locals/monitoring-prometheus/volume0"
+        bdev: "/dev/sdb2"
+        capacity:
+          start: 25600MB
+          end: 51200MB
+      - path: "/mnt/locals/cassandras-commitlog/volume0"
+        bdev: "/dev/sdb3"
+        capacity:
+          start: 51200MB
+          end: 153600MB
+      - path: "/mnt/locals/cassandras-data/volume1"
+        bdev: "/dev/sdb4"
+        capacity:
+          start: 153600MB
+          end: 1075200MB
+      - path: "/mnt/locals/minio/volume0"
+        bdev: "/dev/sdb5"
+        capacity:
+          start: 1075200MB
+          end: 1228800MB
+      - path: "/mnt/locals/engine/volume0"
+        bdev: "/dev/sdb6"
+        capacity:
+          start: 1228800MB
+          end: 1259520MB
+      - path: "/mnt/locals/engine/volume1"
+        bdev: "/dev/sdb7"
+        capacity:
+          start: 1259520MB
+          end: 1290240MB
+      - path: "/mnt/locals/kafkas/volume0"
+        bdev: "/dev/sdb8"
+        capacity:
+          start: 1290240MB
+          end: 1597440MB
+      - path: "/mnt/locals/zookeepers/volume0"
+        bdev: "/dev/sdb9"
+        capacity:
+          start: 1597440MB
+          end: 1648640MB
+      - path: "/mnt/locals/mysql/volume0"
+        bdev: "/dev/sdb10"
+        capacity:
+          start: 1648640MB
+          end: 1748640MB
+      name: "/dev/sdb"
+
+  unity-va-ut-st1102:
+    - parts:
+      - path: "/mnt/locals/monitoring-alertmanager/volume0"
+        bdev: "/dev/sdb1"
+        capacity:
+          start: 0MB
+          end: 25600MB
+      - path: "/mnt/locals/monitoring-prometheus/volume0"
+        bdev: "/dev/sdb2"
+        capacity:
+          start: 25600MB
+          end: 51200MB
+      - path: "/mnt/locals/cassandras-commitlog/volume0"
+        bdev: "/dev/sdb3"
+        capacity:
+          start: 51200MB
+          end: 153600MB
+      - path: "/mnt/locals/cassandras-data/volume1"
+        bdev: "/dev/sdb4"
+        capacity:
+          start: 153600MB
+          end: 742400MB
+      - path: "/mnt/locals/minio/volume0"
+        bdev: "/dev/sdb5"
+        capacity:
+          start: 742400MB
+          end: 773120MB
+      - path: "/mnt/locals/kafkas/volume0"
+        bdev: "/dev/sdb6"
+        capacity:
+          start: 773120MB
+          end: 1080320MB
+      - path: "/mnt/locals/zookeepers/volume0"
+        bdev: "/dev/sdb7"
+        capacity:
+          start: 1080320MB
+          end: 1131520MB
+      - path: "/mnt/locals/structdb-elasticsearch/volume0"
+        bdev: "/dev/sdb8"
+        capacity:
+          start: 1131520MB
+          end: 1631520MB                          # 500G for struct-db elasticsearch
+      - path: "/mnt/locals/mysql/volume0"
+        bdev: "/dev/sdb9"
+        capacity:
+          start: 1631520MB
+          end: 1831520MB
+      - path: "/mnt/locals/model-manager/volume0"
+        bdev: "/dev/sdb10"
+        capacity:
+          start: 1831520MB
+          end: 2131520MB          # 200GB
+      name: "/dev/sdb"
+  unity-va-ut-st1103:
+    - parts:
+      - path: "/mnt/locals/monitoring-alertmanager/volume0"
+        bdev: "/dev/sdb1"
+        capacity:
+          start: 0MB
+          end: 25600MB
+      - path: "/mnt/locals/monitoring-prometheus/volume0"
+        bdev: "/dev/sdb2"
+        capacity:
+          start: 25600MB
+          end: 51200MB
+      - path: "/mnt/locals/cassandras-commitlog/volume0"
+        bdev: "/dev/sdb3"
+        capacity:
+          start: 51200MB
+          end: 153600MB
+      - path: "/mnt/locals/cassandras-data/volume1"
+        bdev: "/dev/sdb4"
+        capacity:
+          start: 153600MB
+          end: 1075200MB
+      - path: "/mnt/locals/minio/volume0"
+        bdev: "/dev/sdb5"
+        capacity:
+          start: 1075200MB
+          end: 1259520MB
+      - path: "/mnt/locals/kafkas/volume0"
+        bdev: "/dev/sdb6"
+        capacity:
+          start: 1259520MB
+          end: 1566720MB
+      - path: "/mnt/locals/zookeepers/volume0"
+        bdev: "/dev/sdb7"
+        capacity:
+          start: 1566720MB
+          end: 1617920MB
+      - path: "/mnt/locals/structdb-elasticsearch/volume0"
+        bdev: "/dev/sdb8"
+        capacity:
+          start: 1617920MB
+          end: 2117920MB                          # 500G for struct-db elasticsearch
+      - path: "/mnt/locals/mysql/volume0"
+        bdev: "/dev/sdb9"
+        capacity:
+          start: 2117920MB
+          end: 2317920MB
+      - path: "/mnt/locals/model-manager/volume0"
+        bdev: "/dev/sdb10"
+        capacity:
+          start: 2317920MB
+          end: 2517920MB          # 200GB
+      name: "/dev/sdb"
+
+  unity-va-ut-ff9527:
+    - name: /dev/sdb
+      parts:
+        - bdev: /dev/sdb1
+          capacity:
+            start: 1MB
+            end: 1000000MB              # 1000G    tsfd/sfd
+          path: /mnt/locals/cassandras-data/volume0
+        - bdev: /dev/sdb2
+          capacity:
+            start: 1000000MB
+            end: 1100000MB               # 100G  tsfd/sfd
+          path: /mnt/locals/cassandras-commitlog/volume0
+        - bdev: /dev/sdb3
+          capacity:
+            start: 1100000MB
+            end: 1900000MB           # 800G
+          path: /mnt/locals/structdb-elasticsearch/volume0
+        - bdev: /dev/sdb4
+          capacity:
+            start: 1900000MB
+            end: 2900000MB           # 1000G    olap
+          path: /mnt/locals/kafkas/volume0
+        - bdev: /dev/sdb5
+          capacity:
+            start: 2900000MB
+            end: 2950000MB        # 50G
+          path: /mnt/locals/zookeepers/volume0
+        - bdev: /dev/sdb6
+          capacity:
+            start: 2950000MB
+            end: 3150000MB           # 200G
+          path: /mnt/locals/monitoring-prometheus/volume0
+        - bdev: /dev/sdb7
+          capacity:
+            start: 3150000MB
+            end: 3350000MB           # 200G
+          path: /mnt/locals/monitoring-alertmanager/volume0
+        - bdev: /dev/sdb8
+          capacity:
+            start: 3350000MB
+            end: 3850000MB          # 500G
+          path: /mnt/locals/minio/volume0
+        - bdev: /dev/sdb9
+          capacity:
+            start: 3850000MB
+            end: 4050000MB           # 200G
+          path: /mnt/locals/mysql/volume1
+        - bdev: /dev/sdb10
+          capacity:
+            start: 4050000MB
+            end: 4080000MB               # 30G
+          path: /mnt/locals/engine/volume0
+        - bdev: /dev/sdb11
+          capacity:
+            start: 4080000MB
+            end: 4110000MB               # 30G
+          path: /mnt/locals/engine/volume1
+        - bdev: /dev/sdb12
+          capacity:
+            start: 4110000MB
+            end: 4140000MB               # 30G
+          path: /mnt/locals/engine/volume2
+        - bdev: /dev/sdb13
+          capacity:
+            start: 4140000MB
+            end: 4170000MB               # 30G
+          path: /mnt/locals/engine/volume3
+        - bdev: /dev/sdb14
+          capacity:
+            start: 4170000MB
+            end: 4200000MB               # 30G
+          path: /mnt/locals/engine/volume4
+        - bdev: /dev/sdb15
+          capacity:
+            start: 4200000MB
+            end: 5200000MB          # 2T
+          path: /datafusion
+        - bdev: /dev/sdb16
+          capacity:
+            start: 5200000MB
+            end: 5400000MB          # 200GB
+          path: /mnt/locals/model-manager/volume0
+    - name: /dev/sdc
+      parts:
+        - bdev: /dev/sdc1
+          capacity:
+            start: 1MB
+            end: 28003031MB          # 26T
+          path: /nas
+
+  unity-va-fd-ag1001:
+    - name: /dev/sdb
+      parts:
+        - bdev: /dev/sdb1
+          capacity:
+            start: 1MB
+            end: 1500000MB              # 1500G    tsfd/sfd
+          path: /mnt/locals/cassandras-data/volume0
+        - bdev: /dev/sdb2
+          capacity:
+            start: 1500000MB
+            end: 1600000MB               # 100G  tsfd/sfd
+          path: /mnt/locals/cassandras-commitlog/volume0
+        - bdev: /dev/sdb3
+          capacity:
+            start: 1600000MB
+            end: 2400000MB           # 800G
+          path: /mnt/locals/structdb-elasticsearch/volume0
+        - bdev: /dev/sdb4
+          capacity:
+            start: 2400000MB
+            end: 4400000MB           # 2000G    default
+          path: /mnt/locals/kafkas/volume0
+        - bdev: /dev/sdb5
+          capacity:
+            start: 4400000MB
+            end: 4450000MB        # 50G
+          path: /mnt/locals/zookeepers/volume0
+        - bdev: /dev/sdb6
+          capacity:
+            start: 4450000MB
+            end: 4650000MB           # 200G
+          path: /mnt/locals/monitoring-prometheus/volume0
+        - bdev: /dev/sdb7
+          capacity:
+            start: 4650000MB
+            end: 4850000MB           # 200G
+          path: /mnt/locals/monitoring-alertmanager/volume0
+        - bdev: /dev/sdb8
+          capacity:
+            start: 4850000MB
+            end: 5350000MB          # 500G
+          path: /mnt/locals/minio/volume0
+        - bdev: /dev/sdb9
+          capacity:
+            start: 5350000MB
+            end: 5550000MB           # 200G
+          path: /mnt/locals/mysql/volume1
+        - bdev: /dev/sdb10
+          capacity:
+            start: 5550000MB
+            end: 5580000MB               # 30G
+          path: /mnt/locals/engine/volume0
+        - bdev: /dev/sdb11
+          capacity:
+            start: 5580000MB
+            end: 5610000MB               # 30G
+          path: /mnt/locals/engine/volume1
+        - bdev: /dev/sdb12
+          capacity:
+            start: 5610000MB
+            end: 5640000MB               # 30G
+          path: /mnt/locals/engine/volume2
+        - bdev: /dev/sdb13
+          capacity:
+            start: 5640000MB
+            end: 5670000MB               # 30G
+          path: /mnt/locals/engine/volume3
+        - bdev: /dev/sdb14
+          capacity:
+            start: 5670000MB
+            end: 5700000MB               # 30G
+          path: /mnt/locals/engine/volume4
+        - bdev: /dev/sdb15
+          capacity:
+            start: 5700000MB
+            end: 7700000MB          # 2T
+          path: /datafusion
+        - bdev: /dev/sdb16
+          capacity:
+            start: 7700000MB
+            end: 7900000MB          # 200GB
+          path: /mnt/locals/model-manager/volume0
+    - name: /dev/sdc
+      parts:
+        - bdev: /dev/sdc1
+          capacity:
+            start: 1MB
+            end: 28003031MB          # 26T
+          path: /nas
+
+
+default_bmount_disk_parted_rules:
+  - name: sfd-oplog 
+    src_path: /locals/
+    dest_path: /mnt/locals/
+    volume_names:
+      - dirs/volume0
+      - dirs/volume1
+      - dirs/volume2
+      - dirs/volume3
+      - dirs/volume4
+      - dirs/volume5
+    nodes:
+      - kube-gpu
+
+default_keepalived:
+  controller_virtual_router_id: 100
+  engine_stream_virtual_router_id: 101
+
+default_namespaces:
+  - "default"
+  - "{{ ingress_namespace }}"
+  - "{{ prometheus_namespace }}"
+  - "{{ logging_namespace }}"
+  - "{{ component_namespace }}"
+  - "{{ addons_namespace }}"
+  - "{{ batch_namespace }}"
+
+default_node_groups_labels:
+  - group: 'controllers'
+    labels:
+      viper.sensetime.com/node-controllers: "True"
+  - group: 'devops'
+    labels:
+      viper.sensetime.com/node-devops: "True"
+  - group: 'components'
+    labels:
+      viper.sensetime.com/node-components: "True"
+  - group: 'object-storages'
+    labels:
+      viper.sensetime.com/node-object-storages: "True"
+  - group: 'engine'
+    labels:
+      viper.sensetime.com/node-engine: "True"
+  - group: 'kube-gpu'
+    labels:
+      viper.sensetime.com/node-gpu: "True"
+  - group: 'engine-stream'
+    labels:
+      viper.sensetime.com/node-engine-stream: "True"
+  - group: 'engine-db'
+    labels:
+      viper.sensetime.com/node-engine-db: "True"
+  - group: 'engine-stream-offline'
+    labels:
+      viper.sensetime.com/node-engine-stream-offline: "True"
+  - group: 'data-timespace-incremental-clustering'
+    labels:
+      viper.sensetime.com/node-data-timespace-incremental-clustering: "True"
+  - group: 'data-static-db-intersection'
+    labels:
+      viper.sensetime.com/node-data-static-db-intersection: "True"
+  - group: 'data-analysis'
+    labels:
+      viper.sensetime.com/node-data-analysis: "True"
+  - group: 'data-fusion'
+    labels:
+      viper.sensetime.com/node-data-fusion: "True"
+  - group: 'data-entity'
+    labels:
+      viper.sensetime.com/node-data-entity: "True"
+  - group: 'hadoop'
+    labels:
+      viper.sensetime.com/node-hadoop: "True"

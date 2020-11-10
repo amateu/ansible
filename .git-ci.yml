@@ -1,0 +1,18 @@
+image: registry.sensetime.com/infra/molecule:2.22
+
+stages:
+  - test
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_DEPTH: '50'
+
+before_script:
+  - rm -rf /etc/yum.repos.d/*.repo
+  - curl --output /etc/yum.repos.d/infra.repo http://sz.viper.sensesecurity.net/config/infra.repo.2.2
+  - yum clean all
+
+test:
+  stage: test
+  script:
+  - molecule test

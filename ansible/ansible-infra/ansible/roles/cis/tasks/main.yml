@@ -1,0 +1,5 @@
+- import_tasks: "level-1.yml"
+  when: cis_apply_level_1_profile
+
+- import_tasks: "level-2.yml"
+  when: cis_apply_level_2_profile

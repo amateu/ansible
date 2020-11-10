@@ -1,0 +1,50 @@
+---
+###
+###  In this variable definition file, we can override some kubespray/ceph vars. User still can override us in group_vars/all.yml
+###
+
+deployment_mode: 'foundry'
+https_sign_category: 'standard'
+
+# deployment_mode: 'foundry'
+#
+# deployment_mode: 'unity-va-ut-ff1001'    # before is: 'unity-sp-100m'
+# deployment_mode: 'unity-va-ut-ff1002'    # before is: 'unity-sp-300m'
+# deployment_mode: 'unity-va-ut-ff1003'    # before is: 'unity-sp-600m'
+# deployment_mode: 'unity-va-ut-ff2102'    # before is: 'unity-dp-i-s'
+# deployment_mode: 'unity-va-ut-ff2103'    # before is: 'unity-dp-i-e'
+# deployment_mode: 'unity-va-ut-ff2204'    # befoer is: 'unity-dp-v-x'
+# deployment_mode: 'unity-va-ut-ff2202'    # before is: 'unity-dp-v-s'
+# deployment_mode: 'unity-va-ut-ff2203'    # before is: 'unity-dp-v-e'
+# deployment_mode: 'unity-va-ut-ff2301'    # before is: 'unity-dp-iv-e'
+# deployment_mode: 'unity-custom'
+
+# Namespace
+component_namespace: component
+batch_namespace: batch
+
+viper_password_dir: /etc/kubernetes/viper/
+viper_password_file: "{{ viper_password_dir }}/passwd.yml"
+
+# NodePorts
+node_port_minio: 30102
+
+node_port_nginx_ingress_batch_manager_http: 30070
+node_port_nginx_ingress_batch_manager_https: 30073
+
+node_port_nginx_ingress_elasticsearch_http: 30060
+node_port_nginx_ingress_elasticsearch_https: 30063
+
+node_port_spark_history_http: 30905
+node_port_spark_history_https: 30935
+
+# Wait Node Ready
+node_ready_retries: 180
+node_ready_delay: 10
+
+addons_logging_enabled: false # Disabled logging module from v2.1(default)
+elasticsearch_config_dir: "{{ components_config_dir }}/elasticsearch"
+
+model_cache_root: "/client-model-cache"
+
+kafka_auth_enabled: true
