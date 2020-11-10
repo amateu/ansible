@@ -47,3 +47,33 @@
     - { role: cis, tags: ['cis'] }
   tags: ['prepare']
 
+# kubernetes
+- hosts: nodes
+  tasks:
+    - name: set skip_downloads false
+      set_fact:
+         skip_downloads: false
+
+- hosts: k8s-cluster:etcd
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  roles:
+    - { role: kubespray-defaults}
+    - { role: kubernetes/preinstall, tags: preinstall }
+    - { role: "container-engine", tags: "container-engine", when: deploy_container_engine|default(true) }
+    - { role: download, tags: download, when: "not skip_downloads" }
+  environment: "{{ proxy_env }}"
+
+- hosts: nodes
+  tasks:
+    - name: set skip_downloads false
+      set_fact:
+         skip_downloads: true
+
+- name: import k8s cluster.yml
+  import_playbook: cluster.yml
+
+- hosts: kube-master[0]
+  roles:
+    - { role: kubespray-defaults, tags: [ 'always' ] }
+    - { role: lib_yaml_editor, tags: [ 'always' ] }
+    - { role: k8s, tags: ['kubernetes'] }
